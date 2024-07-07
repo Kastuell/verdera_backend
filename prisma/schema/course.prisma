@@ -1,0 +1,60 @@
+model Course {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    name String @unique
+    slug String @unique
+
+    chapters CourseChapter[]
+
+    product   Product @relation(fields: [productId], references: [id])
+    productId Int     @unique @map("product_id")
+
+    boughtCourses   BoughtCourses[]
+    completeCourses CompleteCourses[]
+}
+
+model CourseChapter {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    title String @unique
+
+    test Test?
+
+    lection Lection?
+
+    course   Course? @relation(fields: [courseId], references: [id])
+    courseId Int?    @map("course_id")
+
+    completeCourseChapters CompleteCourseChapters[]
+}
+
+model BoughtCourses {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user   User[]
+    course Course[]
+}
+
+model CompleteCourseChapters {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user          User[]
+    courseChapter CourseChapter[]
+}
+
+model CompleteCourses {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user   User[]
+    course Course[]
+}

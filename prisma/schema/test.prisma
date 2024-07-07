@@ -1,0 +1,54 @@
+model Test {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    title String @unique
+    slug  String @unique
+
+    questions    Question[]
+    completeTest CompleteTest[]
+
+    courseChapter   CourseChapter @relation(fields: [courseChapterId], references: [id])
+    courseChapterId Int           @unique
+}
+
+model Question {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    title String @unique
+    type  String
+
+    answers Answer[] @relation("answers")
+
+    correctAnswers Answer[] @relation("correct_answers")
+
+    test   Test? @relation(fields: [testId], references: [id])
+    testId Int?  @map("test_id")
+}
+
+model Answer {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    value String
+    type  String
+
+    question   Question? @relation("answers", fields: [questionId], references: [id])
+    questionId Int?      @map("question_id")
+
+    questionCorrect   Question? @relation("correct_answers", fields: [questionCorrectId], references: [id])
+    questionCorrectId Int?      @map("question_correct_id")
+}
+
+model CompleteTest {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user User[]
+    test Test[]
+}

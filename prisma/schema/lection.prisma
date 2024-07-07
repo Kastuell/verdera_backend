@@ -1,0 +1,26 @@
+model Lection {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    title  String @unique
+    slug   String @unique
+    source String
+    img    String
+
+    materials String[]
+
+    completeLection CompleteLections[]
+
+    courseChapter   CourseChapter @relation(fields: [courseChapterId], references: [id])
+    courseChapterId Int           @unique
+}
+
+model CompleteLections {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user    User[]
+    lection Lection[]
+}

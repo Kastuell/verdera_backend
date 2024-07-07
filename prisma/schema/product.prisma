@@ -1,0 +1,21 @@
+model Product {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    name        String   @unique
+    slug        String   @unique
+    img         String[]
+    description Json
+    price       Int
+    stock       Boolean
+    rating      Int
+    source      String
+
+    category   Category? @relation(fields: [categoryId], references: [id])
+    categoryId Int?      @map("category_id")
+
+    reviews    Review[]
+    orderItems OrderItem[]
+    course     Course?
+}

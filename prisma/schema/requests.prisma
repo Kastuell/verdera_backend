@@ -1,0 +1,22 @@
+model Discount {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    name  String
+    phone String
+    email String
+}
+
+model Support {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    name        String
+    phone       String
+    messenger   String
+    description String
+    user        User?  @relation(fields: [userId], references: [id])
+    userId      Int?   @map("user_id")
+}
