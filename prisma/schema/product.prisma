@@ -3,19 +3,17 @@ model Product {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    name        String   @unique
-    slug        String   @unique
-    img         String[]
+    name      String  @unique
+    slug      String  @unique
+    subName   String  @map("sub_name")
+    img       String
+    price     Int
+    stock     Boolean
     description Json
-    price       Int
-    stock       Boolean
-    rating      Int
-    source      String
 
     category   Category? @relation(fields: [categoryId], references: [id])
     categoryId Int?      @map("category_id")
 
-    reviews    Review[]
     orderItems OrderItem[]
     course     Course?
 }

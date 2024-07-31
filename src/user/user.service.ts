@@ -1,95 +1,113 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EnumUserRoles } from '@prisma/client';
 import { hash } from 'argon2';
 import { AuthRegisterDto } from 'src/auth/dto/auth.dto';
 import { PrismaService } from 'src/prisma.service';
-import { UserDto } from './dto/user.dto';
-import { returnUserFullObject } from './return-user.object';
+import { UserUpdateDto } from './dto/user.dto';
+import { returnUserObject } from './return-user.object';
 
 @Injectable()
 export class UserService {
-    constructor(
-        private prisma: PrismaService,
-    ) { }
+  constructor(private prisma: PrismaService) {}
 
-    async getAll() {
-        return await this.prisma.user.findMany({
-            select: {
-                ...returnUserFullObject
-            }
-        })
-    }
+  async getAll() {
+    const users = await this.prisma.user.findMany({
+      select: {
+        ...returnUserObject,
+      },
+    });
 
-    async getById(id: number) {
-        const user = await this.prisma.user.findUnique({
-            where: {
-                id
-            },
-            select: {
-                ...returnUserFullObject
-            }
-        })
+    if (!users) throw new NotFoundException(`Пользователи не найдены`);
 
-        if (!user) throw new NotFoundException('Пользователь не найден!')
+    return users;
+  }
 
-        return user
-    }
+  async getById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
 
-    async getByEmail(email: string) {
-        const user = await this.prisma.user.findUnique({
-            where: {
-                email
-            }
-        })
+    if (!user) throw new NotFoundException('Пользователь не найден');
 
-        return user
-    }
+    return user;
+  }
 
-    async create(dto: AuthRegisterDto) {
-        const user = {
-            birthday: dto.birthday,
-            email: dto.email,
-            family: dto.family,
-            gender: dto.gender,
-            name: dto.name,
-            password: await hash(dto.password),
-            phone: dto.phone,
-            surname: dto.surname,
-            avatar: '',
-            role: EnumUserRoles.USER,
-            active: true,
-        }
+  async getByEmail(email: string) {
+    if (email === undefined)
+      throw new BadRequestException('Предоставьте почту');
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
 
-        return this.prisma.user.create({
-            data: user
-        })
-    }
+    if (!user) throw new NotFoundException('Пользователь не найден');
 
-    async update(id: number, dto: UserDto) {
+    return user;
+  }
 
-        const {
-            birthday,
-            family,
-            gender,
-            name,
-            phone,
-            surname,
-            avatar,
-        } = dto
+  async checkEmail(email: string) {
+    if (email === undefined)
+      throw new BadRequestException('Предоставьте почту');
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
 
-        return this.prisma.user.update({
-            where: {
-                id
-            },
-            data: {
-                name,
-                surname,
-                family,
-                phone,
-                birthday,
-                gender,
-                avatar,
-            }
-        })
-    }
+    if (user) return 'Почта занята';
+
+    return 'Почта свободна';
+  }
+
+  async create(dto: AuthRegisterDto) {
+    const { password, ...rest } = dto;
+
+    const user = await this.prisma.user.create({
+      data: {
+        password: await hash(password),
+        avatar: '',
+        role: EnumUserRoles.USER,
+        active: true,
+        ...rest,
+      },
+    });
+
+    const { password: pass, ...res } = user;
+
+    return res;
+  }
+
+  async update(id: number, dto: UserUpdateDto) {
+    const user = await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
+
+    const { password, ...res } = user;
+
+    return res;
+  }
 }

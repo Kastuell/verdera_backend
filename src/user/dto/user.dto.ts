@@ -1,33 +1,50 @@
-import { Prisma } from "@prisma/client"
-import { IsIn, IsOptional, IsString } from "class-validator"
-import { GenderT } from "src/auth/dto/auth.dto"
+import { Prisma } from '@prisma/client';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class UserDto implements Prisma.UserUpdateInput {
-    @IsOptional()
-    @IsString()
-    name: string
+  @IsString()
+  name: string;
 
-    @IsOptional()
-    @IsString()
-    surname: string
+  @IsString()
+  surname: string;
 
-    @IsOptional()
-    @IsString()
-    family: string
+  @IsString()
+  family: string;
 
-    @IsOptional()
-    @IsString()
-    phone: string
+  @IsEmail()
+  email: string;
 
-    @IsOptional()
-    @IsString()
-    birthday: string
+  @IsString()
+  birthday: string;
 
-    @IsOptional()
-    @IsIn(["MALE", "FEMALE"])
-    gender: GenderT
+  @IsString()
+  phone: string;
 
-    @IsOptional()
-    @IsString()
-    avatar: string
+  @IsString()
+  password: string;
+
+  @IsString()
+  avatar: string;
+}
+
+export class UserUpdateDto implements Prisma.UserUpdateInput {
+  @IsOptional()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  surname: string;
+
+  @IsOptional()
+  @IsString()
+  family: string;
+
+  @IsOptional()
+  @IsString()
+  phone: string;
+
+  @IsOptional()
+  @IsString()
+  avatar: string;
 }

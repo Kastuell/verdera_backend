@@ -1,112 +1,173 @@
 import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException
-} from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
-import { verify } from 'argon2'
-import { Response } from 'express'
-import { UserService } from 'src/user/user.service'
-import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto'
+  BadRequestException,
+  Injectable,
+  UnauthorizedException
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { EnumUserRoles } from '@prisma/client';
+import { hash, verify } from 'argon2';
+import { Response } from 'express';
+import { PrismaService } from 'src/prisma.service';
+import { returnUserObject } from 'src/user/return-user.object';
+import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
-    EXPIRE_DAY_REFRESH_TOKEN = 1
-    REFRESH_TOKEN_NAME = 'refreshToken'
+  EXPIRE_DAYS_REFRESH_TOKEN = 30;
+  EXPIRE_HOURS_ACCESS_TOKEN = 1;
+  REFRESH_TOKEN_NAME = 'refreshToken';
+  ACCESS_TOKEN_NAME = 'accessToken';
 
-    constructor(
-        private jwt: JwtService,
-        private userService: UserService
-    ) { }
+  constructor(
+    private jwt: JwtService,
+    private prisma: PrismaService,
+  ) {}
 
-    async login(dto: AuthLoginDto) {
-        const { password, ...user } = await this.validateUser(dto)
-        const tokens = this.issueTokens(user.id)
+  async login(dto: AuthLoginDto) {
+    const { password, ...user } = await this.validateUser(dto);
+    const tokens = this.issueTokens(user.id);
 
-        return {
-            user,
-            ...tokens
-        }
-    }
+    return {
+      user,
+      ...tokens,
+    };
+  }
 
-    async register(dto: AuthRegisterDto) {
-        const oldUser = await this.userService.getByEmail(dto.email)
+  async register(dto: AuthRegisterDto) {
+    const { email } = dto;
+    const oldUser = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
 
-        if (oldUser) throw new BadRequestException('Пользователь с такой почтой уже существует!')
+    if (oldUser)
+      throw new BadRequestException(
+        'Пользователь с такой почтой уже существует',
+      );
 
-        const { password, ...user } = await this.userService.create(dto)
+    const { password, ...rest } = dto;
 
-        const tokens = this.issueTokens(user.id)
+    const user = await this.prisma.user.create({
+      data: {
+        password: await hash(password),
+        avatar: '',
+        role: EnumUserRoles.USER,
+        active: true,
+        ...rest,
+      },
+    });
 
-        return {
-            user,
-            ...tokens
-        }
-    }
+    const tokens = this.issueTokens(user.id);
 
-    async getNewTokens(refreshToken: string) {
-        const result = await this.jwt.verifyAsync(refreshToken)
-        if (!result) throw new UnauthorizedException('Invalid refresh token')
+    return {
+      user,
+      ...tokens,
+    };
+  }
 
-        const { password, ...user } = await this.userService.getById(result.id)
+  async getNewTokens(refreshToken: string) {
+    const result = await this.jwt.verifyAsync(refreshToken);
+    if (!result) throw new UnauthorizedException('Invalid refresh token');
 
-        const tokens = this.issueTokens(user.id)
+    const { password, ...user } = await this.prisma.user.findUnique({
+      where: {
+        id: result.id,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
 
-        return {
-            user,
-            ...tokens
-        }
-    }
+    const tokens = this.issueTokens(user.id);
 
-    private issueTokens(userId: number) {
-        const data = { id: userId }
+    return {
+      user,
+      ...tokens,
+    };
+  }
 
-        const accessToken = this.jwt.sign(data, {
-            expiresIn: '1h'
-        })
+  private issueTokens(userId: number) {
+    const data = { id: userId };
 
-        const refreshToken = this.jwt.sign(data, {
-            expiresIn: '7d'
-        })
+    const accessToken = this.jwt.sign(data, {
+      expiresIn: '1h',
+    });
 
-        return { accessToken, refreshToken }
-    }
+    const refreshToken = this.jwt.sign(data, {
+      expiresIn: '7d',
+    });
 
-    private async validateUser(dto: AuthLoginDto) {
-        const user = await this.userService.getByEmail(dto.email)
+    return { accessToken, refreshToken };
+  }
 
-        if (!user) throw new NotFoundException('Пользователь с такой почтой уже существует!')
+  private async validateUser(dto: AuthLoginDto) {
+    const { email } = dto;
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
 
-        const isValid = await verify(user.password, dto.password)
+    if (!user)
+      throw new BadRequestException('Пользователя с такой почтой нет!');
 
-        if (!isValid) throw new UnauthorizedException('Invalid password')
+    const isValid = await verify(user.password, dto.password);
 
-        return user
-    }
+    if (!isValid) throw new UnauthorizedException('Invalid password');
 
-    addRefreshTokenToResponse(res: Response, refreshToken: string) {
-        const expiresIn = new Date()
-        expiresIn.setDate(expiresIn.getDate() + this.EXPIRE_DAY_REFRESH_TOKEN)
+    return user;
+  }
 
-        res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
-            httpOnly: true,
-            domain: 'localhost',
-            expires: expiresIn,
-            secure: true,
-            // lax if production
-            sameSite: 'none'
-        })
-    }
+  addTokensToResponse(
+    res: Response,
+    refreshToken: string,
+    accessToken: string,
+  ) {
+    const expiresInRefresh = new Date();
+    expiresInRefresh.setDate(
+      expiresInRefresh.getDate() + this.EXPIRE_DAYS_REFRESH_TOKEN,
+    );
 
-    removeRefreshTokenFromResponse(res: Response) {
-        res.cookie(this.REFRESH_TOKEN_NAME, '', {
-            httpOnly: true,
-            domain: 'localhost',
-            expires: new Date(0),
-            secure: true,
-            // lax if production
-            sameSite: 'none'
-        })
-    }
+    const expiresInAccess = new Date();
+    expiresInAccess.setHours(
+      expiresInRefresh.getHours() + this.EXPIRE_HOURS_ACCESS_TOKEN,
+    );
+
+    res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: expiresInRefresh,
+      secure: true,
+      // lax if production
+      sameSite: 'none',
+    });
+    res.cookie(this.ACCESS_TOKEN_NAME, accessToken, {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: expiresInAccess,
+      secure: true,
+      // lax if production
+      sameSite: 'none',
+    });
+  }
+
+  removeTokensFromResponse(res: Response) {
+    res.cookie(this.REFRESH_TOKEN_NAME, '', {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: new Date(0),
+      secure: true,
+      // lax if production
+      sameSite: 'none',
+    });
+    res.cookie(this.ACCESS_TOKEN_NAME, '', {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: new Date(0),
+      secure: true,
+      // lax if production
+      sameSite: 'none',
+    });
+  }
 }

@@ -1,16 +1,16 @@
 import { Prisma } from "@prisma/client";
-import { IsArray, IsBoolean, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
 
 export class ProductDto implements Prisma.ProductUpdateInput {
     @IsString()
     name: string
 
-    @IsObject()
-    description: any
-
+    @IsString()
     @IsOptional()
-    @IsArray()
-    img: string[]
+    subName: string
+
+    @IsString()
+    img: string
 
     @IsNumber()
     price: number
@@ -18,10 +18,36 @@ export class ProductDto implements Prisma.ProductUpdateInput {
     @IsBoolean()
     stock: boolean
 
+    @IsObject()
     @IsOptional()
-    @IsString()
-    source: string
+    description: DescriptionT
 
     @IsNumber()
     categoryId: number
+}
+
+
+type DescriptionT = {
+    firstly: string
+    about: DescriptionAboutT
+    structure: DescriptionStructureT
+}
+
+type DescriptionStructureT = {
+    title: string,
+    items: {
+        description: string
+        quantity?: number
+    }[]
+}
+
+type DescriptionAboutT = {
+    title: string
+    img: string
+    items: ItemsT[]
+}
+
+type ItemsT = {
+    title: string
+    description: string
 }

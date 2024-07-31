@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsString } from "class-validator"
+import { IsEmail, IsString } from "class-validator"
 
 export class AuthLoginDto {
     @IsEmail()
@@ -22,13 +22,14 @@ export class AuthRegisterDto extends AuthLoginDto {
     phone: string
 
     @IsString()
+    region: string
+
+    @IsString()
+    social: string
+
+    @IsString()
     birthday: string
-
-    @IsIn(["MALE", "FEMALE"])
-    gender: GenderT
 }
-
-export type GenderT = "MALE" | "FEMALE"
 
 export type RoleT = 'USER' |
     'STUDENT' |

@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-export const returnUserFullObject: Prisma.UserSelect = {
+export const returnUserObject: Prisma.UserSelect = {
     id: true,
     email: true,
     name: true,
@@ -11,10 +11,10 @@ export const returnUserFullObject: Prisma.UserSelect = {
     birthday: true,
     active: true,
     role: true,
-    gender: true,
-    reviews: true,
     orders: true,
     supports: true,
+    region: true,
+    social: true,
     completeTests: {
         select: {
             test: {
@@ -23,15 +23,6 @@ export const returnUserFullObject: Prisma.UserSelect = {
                 }
             }
 
-        }
-    },
-    boughtCourses: {
-        select: {
-            course: {
-                select: {
-                    id: true,
-                }
-            }
         }
     },
     completeCourseChapters: {

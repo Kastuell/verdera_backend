@@ -36,6 +36,7 @@
     "passport-jwt": "^4.0.1",
     "prisma": "^5.16.1",
     "reflect-metadata": "^0.2.0",
+    "resend": "^3.5.0",
     "rxjs": "^7.8.1",
     "yookassa": "^0.1.1"
   },

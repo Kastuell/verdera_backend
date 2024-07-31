@@ -3,7 +3,7 @@ model Test {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    title String @unique
+    name String @unique
     slug  String @unique
 
     questions    Question[]
@@ -18,7 +18,7 @@ model Question {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    title String @unique
+    name String @unique
     type  String
 
     answers Answer[] @relation("answers")

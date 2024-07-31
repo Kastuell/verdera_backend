@@ -6,12 +6,13 @@ model Course {
     name String @unique
     slug String @unique
 
+    description Json
+
     chapters CourseChapter[]
 
     product   Product @relation(fields: [productId], references: [id])
     productId Int     @unique @map("product_id")
 
-    boughtCourses   BoughtCourses[]
     completeCourses CompleteCourses[]
 }
 
@@ -20,7 +21,7 @@ model CourseChapter {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    title String @unique
+    name String
 
     test Test?
 
@@ -30,15 +31,6 @@ model CourseChapter {
     courseId Int?    @map("course_id")
 
     completeCourseChapters CompleteCourseChapters[]
-}
-
-model BoughtCourses {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
-
-    user   User[]
-    course Course[]
 }
 
 model CompleteCourseChapters {
