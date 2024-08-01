@@ -14,9 +14,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
   app.enableCors({
     origin: [
-      "http://localhost:3000/",
-      "https://www.verdera.ru/",
-      "https://verdera.ru/",
+      'http://localhost:3000/',
+      'https://www.verdera.ru/',
+      'https://verdera.ru/',
     ],
     credentials: true,
     exposedHeaders: 'set-cookie',

@@ -136,7 +136,7 @@ export class AuthService {
 
     res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
       httpOnly: true,
-      domain: 'localhost',
+      domain: process.env.DOMAIN,
       expires: expiresInRefresh,
       secure: true,
       // lax if production
@@ -144,7 +144,7 @@ export class AuthService {
     });
     res.cookie(this.ACCESS_TOKEN_NAME, accessToken, {
       httpOnly: true,
-      domain: 'localhost',
+      domain: process.env.DOMAIN,
       expires: expiresInAccess,
       secure: true,
       // lax if production
