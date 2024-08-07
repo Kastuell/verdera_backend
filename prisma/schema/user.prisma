@@ -23,6 +23,8 @@ model User {
     completeCourseChapters CompleteCourseChapters[]
     completeCourses        CompleteCourses[]
 
+    boughtCourses BoughtCourses[]
+
     orders   Order[]
     supports Support[]
 }

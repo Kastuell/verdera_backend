@@ -15,6 +15,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000/',
+      "http://localhost:3000",
       'https://www.verdera.ru/',
       'https://verdera.ru/',
     ],

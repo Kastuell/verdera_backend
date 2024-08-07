@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { UserService } from 'src/user/user.service';
 import translit from 'src/utils/generate-slug';
 import { CourseDto } from './dto/course.dto';
 import { returnCourseObject } from './return-course.object';
@@ -9,7 +8,6 @@ import { returnCourseObject } from './return-course.object';
 export class CourseService {
   constructor(
     private prisma: PrismaService,
-    private userService: UserService,
   ) {}
 
   async getAll() {
@@ -22,6 +20,36 @@ export class CourseService {
     if (!course) throw new NotFoundException(`Курсы не найдены`);
 
     return course;
+  }
+
+  async getBoughtCoursesByUserId(userId: number) {
+    const boughtCourses = await this.prisma.boughtCourses.findMany({
+      where: {
+        userId: userId,
+      },
+      select: {
+        courseId: true,
+      },
+    });
+
+    if(!boughtCourses) throw new NotFoundException('Купленные курсы не найдены')
+
+    return boughtCourses
+  }
+
+  async getMyCourses(userId: number) {
+    const boughtCourses = await this.getBoughtCoursesByUserId(userId)
+
+    const ids = boughtCourses.map((item) => item.courseId);
+
+    return await this.prisma.course.findMany({
+      where: {
+        id: { in: ids },
+      },
+      select: {
+        ...returnCourseObject,
+      },
+    });
   }
 
   async getById(id: number) {
@@ -57,13 +85,14 @@ export class CourseService {
   }
 
   async create(dto: CourseDto) {
-    const { description, name, productId } = dto;
+    const { description, name, productId, img } = dto;
 
     const course = await this.prisma.course.create({
       data: {
         name,
         slug: translit(name),
         description,
+        img,
         product: {
           connect: {
             id: productId,
@@ -76,7 +105,7 @@ export class CourseService {
   }
 
   async update(id: number, dto: CourseDto) {
-    const { description, name, productId } = dto;
+    const { description, name, productId, img } = dto;
 
     const oldCourse = this.getById(id);
 
@@ -91,6 +120,7 @@ export class CourseService {
         name,
         slug: translit(name),
         description,
+        img,
         product: {
           connect: {
             id: productId,
@@ -105,8 +135,8 @@ export class CourseService {
   async delete(id: number) {
     const oldCourse = this.getById(id);
 
-    if (oldCourse)
-      throw new NotFoundException(`Глава под номером ${id} не найдена`);
+    if (!oldCourse)
+      throw new NotFoundException(`Курс под номером ${id} не найден`);
 
     const course = await this.prisma.course.delete({
       where: {

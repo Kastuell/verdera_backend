@@ -10,6 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
+import { CurrentUser } from 'src/decorators/user.decorator';
 import { CourseService } from './course.service';
 import { CourseDto } from './dto/course.dto';
 
@@ -27,6 +28,12 @@ export class CourseController {
   @Auth('ADMIN')
   getById(@Param('id') id: string) {
     return this.courseService.getById(Number(id));
+  }
+
+  @Auth('STUDENT')
+  @Get('/my-courses/get')
+  getMyCourses(@CurrentUser('id') userId: string) {
+    return this.courseService.getMyCourses(Number(userId));
   }
 
   @Auth('ADMIN')

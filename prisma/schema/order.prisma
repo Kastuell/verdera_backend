@@ -6,7 +6,7 @@ model Order {
     total  Int
     status EnumOrderStatus @default(PENDING)
 
-    address Json
+    info Json
 
     items OrderItem[]
 

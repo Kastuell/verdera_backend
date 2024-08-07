@@ -4,7 +4,7 @@ model Test {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     name String @unique
-    slug  String @unique
+    slug String @unique
 
     questions    Question[]
     completeTest CompleteTest[]
@@ -19,7 +19,9 @@ model Question {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     name String @unique
-    type  String
+    slug String @unique
+
+    type String
 
     answers Answer[] @relation("answers")
 

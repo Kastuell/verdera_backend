@@ -1,10 +1,17 @@
 import { Prisma } from '@prisma/client';
+import { returnCourseChapterObject } from 'src/course_chapter/return-course_chapter.object';
 
 export const returnCourseObject: Prisma.CourseSelect = {
-  id: true,
   name: true,
   slug: true,
   description: true,
-  chapters: true,
-  productId: true,
+  img: true,
+  chapters: {
+    select: {
+      ...returnCourseChapterObject,
+    },
+  },
+
+  // productId: true,
+  // BoughtCourses: true,
 };

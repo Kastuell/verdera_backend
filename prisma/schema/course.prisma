@@ -6,6 +6,8 @@ model Course {
     name String @unique
     slug String @unique
 
+    img String
+
     description Json
 
     chapters CourseChapter[]
@@ -14,6 +16,8 @@ model Course {
     productId Int     @unique @map("product_id")
 
     completeCourses CompleteCourses[]
+
+    BoughtCourses BoughtCourses[]
 }
 
 model CourseChapter {
@@ -31,6 +35,18 @@ model CourseChapter {
     courseId Int?    @map("course_id")
 
     completeCourseChapters CompleteCourseChapters[]
+}
+
+model BoughtCourses {
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user     User   @relation(fields: [userId], references: [id])
+    userId   Int    @map("user_id")
+    course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    courseId Int    @map("course_id")
+
+    @@id([userId, courseId])
 }
 
 model CompleteCourseChapters {

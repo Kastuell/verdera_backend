@@ -10,6 +10,9 @@ export class CourseDto implements Prisma.CourseUpdateInput {
 
   @IsNumber()
   productId: number;
+
+  @IsString()
+  img: string;
 }
 
 type DescriptionT = {

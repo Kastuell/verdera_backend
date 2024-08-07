@@ -19,15 +19,6 @@ export class CourseChapterService {
     return courseChapter;
   }
 
-  async getAllOwnCourses(){
-    const courses = await this.prisma.user.findMany({
-        where: {
-            orders: {
-                
-            }
-        }
-    })
-  }
 
   async getByCourseSlug(courseSlug: string) {
     const courseChapters = await this.prisma.courseChapter.findMany({

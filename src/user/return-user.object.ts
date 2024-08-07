@@ -51,5 +51,6 @@ export const returnUserObject: Prisma.UserSelect = {
                 }
             }
         }
-    }
+    },
+    boughtCourses: true
 }

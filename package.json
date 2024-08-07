@@ -38,6 +38,7 @@
     "reflect-metadata": "^0.2.0",
     "resend": "^3.5.0",
     "rxjs": "^7.8.1",
+    "uuid": "^10.0.0",
     "yookassa": "^0.1.1"
   },
   "devDependencies": {
