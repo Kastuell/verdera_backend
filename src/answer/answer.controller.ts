@@ -29,6 +29,12 @@ export class AnswerController {
     return this.answerService.getById(Number(id));
   }
 
+  @Get('by-qustionid/:id')
+  @Auth('ADMIN')
+  getByQuestionId(@Param('id') id: string) {
+    return this.answerService.getByQuestionId(Number(id));
+  }
+
   @Post()
   @Auth('ADMIN')
   @UsePipes(new ValidationPipe())

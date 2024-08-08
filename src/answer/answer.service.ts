@@ -33,13 +33,28 @@ export class AnswerService {
     return answer;
   }
 
+  async getByQuestionId(questionId: number) {
+    const answers = await this.prisma.answer.findMany({
+      where: {
+        questionId: questionId,
+      },
+      select: {
+        ...returnAnswerObject
+      }
+    });
+
+    if (!answers) throw new NotFoundException('Ответы не найдены');
+
+    return answers;
+  }
+
   async create(dto: AnswerDto) {
     const { questionCorrectId, questionId, type, value } = dto;
     const answer = questionCorrectId
       ? await this.prisma.answer.create({
           data: {
             value: value,
-            type: type,
+            type: '',
             question: {
               connect: {
                 id: questionId,
@@ -55,7 +70,7 @@ export class AnswerService {
       : await this.prisma.answer.create({
           data: {
             value: value,
-            type: type,
+            type: '',
             question: {
               connect: {
                 id: questionId,
@@ -76,7 +91,7 @@ export class AnswerService {
           },
           data: {
             value: value,
-            type: type,
+            type: '',
             question: {
               connect: {
                 id: questionId,
@@ -95,7 +110,7 @@ export class AnswerService {
           },
           data: {
             value: value,
-            type: type,
+            type: '',
             question: {
               connect: {
                 id: questionId,

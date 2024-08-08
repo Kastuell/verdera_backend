@@ -95,7 +95,7 @@ export class LectionService {
 
     const oldLection = this.getById(id);
 
-    if (oldLection)
+    if (!oldLection)
       throw new NotFoundException(`Лекция под номером ${id} не найдена`);
 
     const lection = await this.prisma.lection.update({

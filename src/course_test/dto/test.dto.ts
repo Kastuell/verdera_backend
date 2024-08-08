@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 
 export class TestDto implements Prisma.TestUpdateInput {
   @IsString()
@@ -7,4 +7,12 @@ export class TestDto implements Prisma.TestUpdateInput {
 
   @IsNumber()
   courseChapterId: number;
+}
+
+export class CheckTestDto {
+  @IsNumber()
+  testId: number
+  
+  @IsArray()
+  userTest: { questId: number; answerId: number }[];
 }

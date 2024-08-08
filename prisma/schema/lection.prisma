@@ -3,7 +3,7 @@ model Lection {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    name  String @unique
+    name   String @unique
     slug   String @unique
     source String
 
@@ -16,10 +16,13 @@ model Lection {
 }
 
 model CompleteLections {
-    id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    user    User[]
-    lection Lection[]
+    user      User    @relation(fields: [userId], references: [id])
+    userId    Int     @map("user_id")
+    lection   Lection @relation(fields: [lectionId], references: [id], onDelete: Cascade)
+    lectionId Int     @map("lection_id")
+
+    @@id([userId, lectionId])
 }

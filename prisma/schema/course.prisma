@@ -50,19 +50,27 @@ model BoughtCourses {
 }
 
 model CompleteCourseChapters {
-    id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    user          User[]
-    courseChapter CourseChapter[]
+    user            User          @relation(fields: [userId], references: [id])
+    userId          Int           @map("user_id")
+    courseChapter   CourseChapter @relation(fields: [courseChapterId], references: [id], onDelete: Cascade)
+    courseChapterId Int           @map("course_chapter_id")
+
+    @@id([userId, courseChapterId])
 }
 
 model CompleteCourses {
-    id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    user   User[]
-    course Course[]
+    user     User   @relation(fields: [userId], references: [id])
+    userId   Int    @map("user_id")
+    course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    courseId Int    @map("course_id")
+
+    progress Int[]
+
+    @@id([userId, courseId])
 }

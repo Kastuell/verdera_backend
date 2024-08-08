@@ -6,9 +6,7 @@ import { returnCourseObject } from './return-course.object';
 
 @Injectable()
 export class CourseService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async getAll() {
     const course = await this.prisma.course.findMany({
@@ -32,13 +30,14 @@ export class CourseService {
       },
     });
 
-    if(!boughtCourses) throw new NotFoundException('Купленные курсы не найдены')
+    if (!boughtCourses)
+      throw new NotFoundException('Купленные курсы не найдены');
 
-    return boughtCourses
+    return boughtCourses;
   }
 
   async getMyCourses(userId: number) {
-    const boughtCourses = await this.getBoughtCoursesByUserId(userId)
+    const boughtCourses = await this.getBoughtCoursesByUserId(userId);
 
     const ids = boughtCourses.map((item) => item.courseId);
 
@@ -59,6 +58,20 @@ export class CourseService {
       },
       select: {
         ...returnCourseObject,
+        chapters: {
+          select: {
+            lection: {
+              select: {
+                id: true,
+              },
+            },
+            test: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
       },
     });
 

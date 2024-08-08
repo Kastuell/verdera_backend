@@ -6,12 +6,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
+import { CurrentUser } from 'src/decorators/user.decorator';
 import { CourseTestService } from './course_test.service';
-import { TestDto } from './dto/test.dto';
+import { CheckTestDto, TestDto } from './dto/test.dto';
 
 @Controller('course-test')
 export class CourseTestController {
@@ -25,14 +27,21 @@ export class CourseTestController {
 
   @Auth('ADMIN')
   @Get('by-slug/:slug')
-  getByCourseSlug(@Param('slug') slug: string) {
-    return this.courseTestService.getBySlug(slug);
+  getBySlug(@Param('slug') slug: string, @Query() query: string) {
+    return this.courseTestService.getBySlug(slug, query);
   }
 
   @Get(':id')
   @Auth('ADMIN')
   getById(@Param('id') id: string) {
     return this.courseTestService.getById(Number(id));
+  }
+
+  @Auth('STUDENT')
+  @Post('check-test')
+  @UsePipes(new ValidationPipe())
+  async checkTest(@CurrentUser('id') id: string, @Body() dto: CheckTestDto) {
+    return this.courseTestService.checkTest(dto, Number(id));
   }
 
   @Post()

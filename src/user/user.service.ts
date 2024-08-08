@@ -75,6 +75,70 @@ export class UserService {
     return 'Почта свободна';
   }
 
+  async createCompleteCourses(
+    userId: number,
+    courseId: number,
+    progress: number[],
+  ) {
+    const completeCourse = await this.prisma.completeCourses.findUnique({
+      where: {
+        userId_courseId: {
+          userId: userId,
+          courseId: courseId,
+        },
+      },
+    });
+    if (completeCourse == null) {
+      return await this.prisma.completeCourses.create({
+        data: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          course: {
+            connect: {
+              id: courseId,
+            },
+          },
+          progress: progress,
+        },
+      });
+    } else {
+      return await this.prisma.completeCourses.update({
+        where: {
+          userId_courseId: {
+            userId: completeCourse.userId,
+            courseId: completeCourse.courseId,
+          },
+        },
+        data: {
+          progress: [
+            progress[0],
+            completeCourse.progress[1] + progress[1],
+          ],
+        },
+      });
+    }
+  }
+
+  async createCompleteTest(userId: number, testId: number) {
+    return await this.prisma.completeTest.create({
+      data: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        test: {
+          connect: {
+            id: testId,
+          },
+        },
+      },
+    });
+  }
+
   async create(dto: AuthRegisterDto) {
     const { password, ...rest } = dto;
 
