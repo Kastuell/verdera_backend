@@ -70,7 +70,5 @@ model CompleteCourses {
     course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
     courseId Int    @map("course_id")
 
-    progress Int[]
-
     @@id([userId, courseId])
 }

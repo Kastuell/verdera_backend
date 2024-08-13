@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
   Req,
@@ -10,6 +11,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { Auth } from 'src/decorators/auth.decorator';
 import { AuthService } from './auth.service';
 import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto';
 
@@ -65,6 +67,23 @@ export class AuthController {
     this.authService.addTokensToResponse(res, refreshToken, accessToken);
 
     return response;
+  }
+
+  @Auth()
+  @Get('by-accesstoken')
+  async getByAccessToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const accessTokenFromCookies =
+      req.cookies[this.authService.ACCESS_TOKEN_NAME];
+
+    if (!accessTokenFromCookies) {
+      this.authService.removeTokensFromResponse(res);
+      throw new UnauthorizedException('Access token not passed');
+    }
+
+    return this.authService.getByAccessToken(accessTokenFromCookies);
   }
 
   @HttpCode(200)

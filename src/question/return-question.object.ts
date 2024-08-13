@@ -7,6 +7,7 @@ export const returnQuestionObject: Prisma.QuestionSelect = {
     select: {
       id: true,
       value: true,
+      questionCorrectId: true
     },
   },
 };

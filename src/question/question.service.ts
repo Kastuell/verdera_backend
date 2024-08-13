@@ -53,6 +53,41 @@ export class QuestionService {
     return question;
   }
 
+  async findQuestionsByIds(ids: number[]) {
+    const thisQuestions = await this.prisma.question.findMany({
+      where: {
+        id: { in: ids },
+      },
+      select: {
+        id: true,
+        answers: {
+          where: {
+            questionCorrectId: {
+              not: null,
+            },
+          },
+          select: {
+            id: true,
+            questionCorrectId: true,
+          },
+        },
+        test: {
+          select: {
+            courseChapter: {
+              select: {
+                courseId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!thisQuestions) throw new NotFoundException('Не найдено');
+
+    return thisQuestions;
+  }
+
   async getByTestSlug(testSlug: string) {
     const questions = await this.prisma.question.findMany({
       where: {
@@ -80,7 +115,7 @@ export class QuestionService {
       },
     });
 
-    if (!question) throw new NotFoundException('Вопрос не найден');
+    if (!question) throw new NotFoundException('Вопросы не найдены');
 
     return question;
   }

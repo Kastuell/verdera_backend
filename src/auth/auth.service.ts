@@ -1,7 +1,7 @@
 import {
   BadRequestException,
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EnumUserRoles } from '@prisma/client';
@@ -64,6 +64,20 @@ export class AuthService {
       user,
       ...tokens,
     };
+  }
+
+  async getByAccessToken(accessToken: string) {
+    const { id } = await this.jwt.verifyAsync(accessToken);
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+      select: {
+        role: true,
+      },
+    });
+    return user;
   }
 
   async getNewTokens(refreshToken: string) {

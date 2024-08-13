@@ -39,8 +39,8 @@ export class AnswerService {
         questionId: questionId,
       },
       select: {
-        ...returnAnswerObject
-      }
+        ...returnAnswerObject,
+      },
     });
 
     if (!answers) throw new NotFoundException('Ответы не найдены');
@@ -66,6 +66,23 @@ export class AnswerService {
               },
             },
           },
+          select: {
+            id: true,
+            value: true,
+            question: {
+              select: {
+                id: true,
+                name: true,
+                answers: {
+                  select: {
+                    id: true,
+                    value: true,
+                    questionCorrectId: true,
+                  },
+                },
+              },
+            },
+          },
         })
       : await this.prisma.answer.create({
           data: {
@@ -74,6 +91,23 @@ export class AnswerService {
             question: {
               connect: {
                 id: questionId,
+              },
+            },
+          },
+          select: {
+            id: true,
+            value: true,
+            question: {
+              select: {
+                id: true,
+                name: true,
+                answers: {
+                  select: {
+                    id: true,
+                    value: true,
+                    questionCorrectId: true,
+                  },
+                },
               },
             },
           },

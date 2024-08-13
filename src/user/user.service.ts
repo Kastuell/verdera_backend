@@ -75,11 +75,7 @@ export class UserService {
     return 'Почта свободна';
   }
 
-  async createCompleteCourses(
-    userId: number,
-    courseId: number,
-    progress: number[],
-  ) {
+  async createCompleteCourses(userId: number, courseId: number) {
     const completeCourse = await this.prisma.completeCourses.findUnique({
       where: {
         userId_courseId: {
@@ -88,7 +84,7 @@ export class UserService {
         },
       },
     });
-    if (completeCourse == null) {
+    if (!completeCourse) {
       return await this.prisma.completeCourses.create({
         data: {
           user: {
@@ -101,42 +97,9 @@ export class UserService {
               id: courseId,
             },
           },
-          progress: progress,
-        },
-      });
-    } else {
-      return await this.prisma.completeCourses.update({
-        where: {
-          userId_courseId: {
-            userId: completeCourse.userId,
-            courseId: completeCourse.courseId,
-          },
-        },
-        data: {
-          progress: [
-            progress[0],
-            completeCourse.progress[1] + progress[1],
-          ],
         },
       });
     }
-  }
-
-  async createCompleteTest(userId: number, testId: number) {
-    return await this.prisma.completeTest.create({
-      data: {
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-        test: {
-          connect: {
-            id: testId,
-          },
-        },
-      },
-    });
   }
 
   async create(dto: AuthRegisterDto) {

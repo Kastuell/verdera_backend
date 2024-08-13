@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CourseChapterService } from 'src/course_chapter/course_chapter.service';
 import { PrismaService } from 'src/prisma.service';
 import translit from 'src/utils/generate-slug';
 import { CourseDto } from './dto/course.dto';
@@ -6,7 +7,10 @@ import { returnCourseObject } from './return-course.object';
 
 @Injectable()
 export class CourseService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private courseChapterService: CourseChapterService,
+  ) {}
 
   async getAll() {
     const course = await this.prisma.course.findMany({
@@ -41,14 +45,44 @@ export class CourseService {
 
     const ids = boughtCourses.map((item) => item.courseId);
 
-    return await this.prisma.course.findMany({
+    const myCourses = await this.prisma.course.findMany({
       where: {
         id: { in: ids },
       },
       select: {
         ...returnCourseObject,
       },
+      orderBy: {
+        id: 'asc',
+      },
     });
+
+    const mappedCourses = myCourses.map(async (item) => {
+      const { chapters: chpt, id, BoughtCourses, ...rest } = item;
+
+      const courseChaptersCompleted =
+        await this.courseChapterService.findCompleteCourseChapters(userId, id);
+
+      const chapters = chpt.map((item) => {
+        return courseChaptersCompleted.findIndex(
+          (item) => item.courseChapterId == item.courseChapterId,
+        ) !== -1
+          ? { item, userCompleted: true, access: true }
+          : { item, userCompleted: false, access: false };
+      });
+
+      const index = chapters.findIndex((item) => item.userCompleted == false);
+
+      chapters[index].access = true;
+
+      return {
+        id,
+        chapters,
+        ...rest,
+      };
+    });
+
+    return Promise.all(mappedCourses);
   }
 
   async getById(id: number) {

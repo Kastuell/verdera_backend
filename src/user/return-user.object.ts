@@ -31,7 +31,6 @@ export const returnUserObject: Prisma.UserSelect = {
     select: {
       courseId: true,
       userId: true,
-      progress: true,
     },
   },
   completeLection: {

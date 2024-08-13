@@ -12,6 +12,9 @@ export class CourseChapterService {
       select: {
         ...returnCourseChapterObject,
       },
+      orderBy: {
+        id: 'asc',
+      },
     });
 
     if (!courseChapter) throw new NotFoundException(`Главы не найдены`);
@@ -19,6 +22,129 @@ export class CourseChapterService {
     return courseChapter;
   }
 
+  async findCompleteCourseChapters(userId: number, courseId: number) {
+    const completeCourseChapters =
+      await this.prisma.completeCourseChapters.findMany({
+        where: {
+          userId: userId,
+          courseChapter: {
+            course: {
+              id: courseId,
+            },
+          },
+        },
+        select: {
+          courseChapter: {
+            select: {
+              lection: true,
+              test: true,
+              id: true,
+              name: true,
+            },
+          },
+          user: true,
+          courseChapterId: true,
+          userId: true,
+        },
+        orderBy: {
+          courseChapterId: 'asc',
+        },
+      });
+
+    if (!completeCourseChapters) throw new NotFoundException('Не найдено');
+
+    return completeCourseChapters;
+  }
+
+  async findCompleteCourseChapter(courseChapterId: number, userId: number) {
+    const completeCourseChapter =
+      await this.prisma.completeCourseChapters.findUnique({
+        where: {
+          userId_courseChapterId: {
+            courseChapterId: courseChapterId,
+            userId: userId,
+          },
+        },
+      });
+
+
+    return completeCourseChapter;
+  }
+
+  async findCourseChapterByTestId(testId: number) {
+    const completeCourseChapter = await this.prisma.courseChapter.findMany({
+      where: {
+        test: {
+          id: testId,
+        },
+      },
+      select: {
+        id: true,
+        lection: true,
+        test: true,
+        name: true,
+        courseId: true,
+      },
+    });
+
+    if (!completeCourseChapter) throw new NotFoundException('Не найдено');
+
+    return completeCourseChapter[0];
+  }
+
+  async findCourseChapterByLectionId(lectionId: number) {
+    const completeCourseChapter = await this.prisma.courseChapter.findMany({
+      where: {
+        lection: {
+          id: lectionId,
+        },
+      },
+      select: {
+        test: true,
+        lection: true,
+        name: true,
+        id: true,
+      },
+    });
+
+
+    return completeCourseChapter[0];
+  }
+
+  async createCompleteCourseChapter(courseChapterId: number, userId: number) {
+    const completeCourseChapter = await this.findCompleteCourseChapter(
+      courseChapterId,
+      userId,
+    );
+
+    if (completeCourseChapter)
+      throw new NotFoundException('Вы уже прошли эту главу');
+
+    return await this.prisma.completeCourseChapters.create({
+      data: {
+        courseChapterId,
+        userId,
+      },
+    });
+  }
+
+  async getByCourseId(courseId: number) {
+    const courseChapters = await this.prisma.courseChapter.findMany({
+      where: {
+        course: {
+          id: courseId,
+        },
+      },
+      select: {
+        ...returnCourseChapterObject,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    return courseChapters;
+  }
 
   async getByCourseSlug(courseSlug: string) {
     const courseChapters = await this.prisma.courseChapter.findMany({
@@ -29,6 +155,9 @@ export class CourseChapterService {
       },
       select: {
         ...returnCourseChapterObject,
+      },
+      orderBy: {
+        id: 'asc',
       },
     });
 

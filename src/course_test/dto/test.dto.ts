@@ -14,5 +14,5 @@ export class CheckTestDto {
   testId: number
   
   @IsArray()
-  userTest: { questId: number; answerId: number }[];
+  userTest: { questId: number; answerId: number[] }[];
 }

@@ -15,8 +15,14 @@ export class QuestionController {
 
   @Auth('ADMIN')
   @Get('by-slug/:slug')
-  getByCourseSlug(@Param('slug') slug: string) {
+  getBySlug(@Param('slug') slug: string) {
     return this.questionService.getBySlug(slug);
+  }
+
+  @Auth('ADMIN')
+  @Get('by-test-slug/:slug')
+  getByTestSlug(@Param('slug') slug: string) {
+    return this.questionService.getByTestSlug(slug);
   }
 
   @Get(':id')

@@ -10,6 +10,9 @@ export const returnCourseObject: Prisma.CourseSelect = {
     select: {
       ...returnCourseChapterObject,
     },
+    orderBy: {
+      id: 'asc',
+    },
   },
 
   // productId: true,

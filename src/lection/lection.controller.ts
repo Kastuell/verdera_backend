@@ -36,6 +36,18 @@ export class LectionController {
     return this.lectionService.getBySlug(Number(id), slug);
   }
 
+  @Auth('STUDENT')
+  @Post('complete-lection/:id')
+  createCompleteLection(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.lectionService.createCompleteLection(
+      Number(id),
+      Number(userId),
+    );
+  }
+
   @Post()
   @Auth('ADMIN')
   @UsePipes(new ValidationPipe())

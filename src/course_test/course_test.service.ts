@@ -3,10 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CourseService } from 'src/course/course.service';
+import { CourseChapterService } from 'src/course_chapter/course_chapter.service';
+import { LectionService } from 'src/lection/lection.service';
 import { PrismaService } from 'src/prisma.service';
+import { QuestionService } from 'src/question/question.service';
 import { returnQuestionObject } from 'src/question/return-question.object';
-import { UserService } from 'src/user/user.service';
 import translit from 'src/utils/generate-slug';
 import { shuffle } from '../utils/shufle';
 import { CheckTestDto, TestDto } from './dto/test.dto';
@@ -16,8 +17,9 @@ import { returnTestObject } from './return-test.object';
 export class CourseTestService {
   constructor(
     private prisma: PrismaService,
-    private userService: UserService,
-    private courseService: CourseService,
+    private courseChapterService: CourseChapterService,
+    private lectionService: LectionService,
+    private questionService: QuestionService,
   ) {}
 
   async getAll() {
@@ -82,76 +84,100 @@ export class CourseTestService {
     return shuffledTest;
   }
 
-  async checkTest(dto: CheckTestDto, userId: number) {
+  async findCompleteTest(testId: number, userId: number) {
     const completeTest = await this.prisma.completeTest.findUnique({
       where: {
         userId_testId: {
+          testId: testId,
           userId: userId,
-          testId: dto.testId,
         },
       },
     });
 
-    if (completeTest !== null)
-      throw new BadRequestException('Вы уже решили этот тест');
+    if (!completeTest) throw new NotFoundException('Не найдено');
+
+    return completeTest;
+  }
+
+  async createCompleteTest(userId: number, testId: number) {
+    const completeTest = await this.findCompleteTest(testId, userId);
+
+    if (completeTest) throw new BadRequestException('Вы уже решили этот тест');
+
+    return await this.prisma.completeTest.create({
+      data: {
+        testId: testId,
+        userId: userId,
+      },
+    });
+  }
+
+  async checkTest(dto: CheckTestDto, userId: number) {
+    const courseChapter =
+      await this.courseChapterService.findCourseChapterByTestId(dto.testId);
+
+    const completeLection = await this.lectionService.findCompleteLection(
+      courseChapter.lection.id,
+      userId,
+    );
+
+    if (!completeLection)
+      throw new BadRequestException('Вы ещё не прошли лекцию');
+
+    const completeTest = await this.findCompleteTest(dto.testId, userId);
+
+    if (completeTest) throw new BadRequestException('Вы уже решили этот тест');
 
     const questionIds = dto.userTest.map((item) => item.questId);
 
-    const thisQuestions = await this.prisma.question.findMany({
-      where: {
-        id: { in: questionIds },
-      },
-      select: {
-        id: true,
-        answers: {
-          where: {
-            questionCorrectId: {
-              not: null,
-            },
-          },
-          select: {
-            id: true,
-            questionCorrectId: true,
-          },
-        },
-        test: {
-          select: {
-            courseChapter: {
-              select: {
-                courseId: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const thisQuestions =
+      await this.questionService.findQuestionsByIds(questionIds);
 
     const sortedUserTest = dto.userTest.sort((a, b) => a.questId - b.questId);
 
     const thisQuestionsMapped = thisQuestions.map((item) => ({
       questId: item.id,
-      answerId: item.answers[0].id,
+      answerId: item.answers.map((item) => item.id),
     }));
 
-    if (
-      JSON.stringify(sortedUserTest) === JSON.stringify(thisQuestionsMapped)
-    ) {
-      await this.userService.createCompleteTest(userId, dto.testId);
+    const result = sortedUserTest.map((i, index) => {
+      const qwe = thisQuestionsMapped[index].answerId.map((item) =>
+        i.answerId.includes(item),
+      );
 
-      const courseId = thisQuestions[0].test.courseChapter.courseId;
+      if (
+        i.questId == thisQuestionsMapped[index].questId &&
+        !qwe.includes(false)
+      ) {
+        return {
+          questionId: i.questId,
+          answerId: i.answerId,
+          isCorrect: true,
+        };
+      } else if (
+        i.questId == thisQuestionsMapped[index].questId &&
+        qwe.includes(false)
+      ) {
+        return {
+          questionId: i.questId,
+          answerId: i.answerId,
+          isCorrect: false,
+        };
+      }
+    });
 
-      const content = (await this.courseService.getById(courseId)).chapters
-        .map((item) => {
-          if (item.lection !== null && item.test !== null) return 2;
-          else if (item.lection !== null || item.test !== null) return 1;
-        })
-        .filter((i) => i !== undefined)
-        .reduce((prev, cur) => prev + cur, 0);
+    if (result.findIndex((item) => item.isCorrect == false) == -1) {
+      await this.createCompleteTest(userId, dto.testId);
 
-      await this.userService.createCompleteCourses(userId, courseId, [
-        content,
-        1,
-      ]);
+      // const courseId = thisQuestions[0].test.courseChapter.courseId;
+
+      // const content = (await this.courseService.getById(courseId)).chapters
+      //   .map((item) => {
+      //     if (item.lection !== null && item.test !== null) return 2;
+      //     else if (item.lection !== null || item.test !== null) return 1;
+      //   })
+      //   .filter((i) => i !== undefined)
+      //   .reduce((prev, cur) => prev + cur, 0);
 
       return true;
     }
