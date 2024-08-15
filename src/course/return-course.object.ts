@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client';
-import { returnCourseChapterObject } from 'src/course_chapter/return-course_chapter.object';
 
 export const returnCourseObject: Prisma.CourseSelect = {
   name: true,
@@ -8,7 +7,20 @@ export const returnCourseObject: Prisma.CourseSelect = {
   img: true,
   chapters: {
     select: {
-      ...returnCourseChapterObject,
+      name: true,
+      id: true,
+      lection: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+      test: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
     },
     orderBy: {
       id: 'asc',

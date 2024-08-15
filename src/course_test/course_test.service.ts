@@ -18,8 +18,8 @@ export class CourseTestService {
   constructor(
     private prisma: PrismaService,
     private courseChapterService: CourseChapterService,
-    private lectionService: LectionService,
     private questionService: QuestionService,
+    private completeLection: LectionService,
   ) {}
 
   async getAll() {
@@ -49,7 +49,30 @@ export class CourseTestService {
     return test;
   }
 
-  async getBySlug(slug: string, query: any) {
+  async getBySlug(slug: string, query: any, userId: number) {
+    const id = await this.prisma.test.findUnique({
+      where: {
+        slug: slug,
+      },
+    });
+
+    const courseChapter =
+      await this.courseChapterService.getCourseChapterByTestId(id.id);
+
+    const completeCourseChapters =
+      await this.courseChapterService.findCompleteCourseChapters(
+        userId,
+        courseChapter.courseId,
+      );
+
+    const courseChapters =
+      await this.courseChapterService.getCourseChaptersByCourseId(
+        courseChapter.courseId,
+      );
+
+    if (courseChapters[completeCourseChapters.length].id !== courseChapter.id) {
+      throw new BadRequestException('Вам сюда рановато');
+    }
     const test = await this.prisma.test.findUnique({
       where: {
         slug: slug,
@@ -68,14 +91,23 @@ export class CourseTestService {
     });
     if (!test) throw new NotFoundException('Тест не найден');
 
-    const shuffledQuestion = shuffle(test.questions).slice(
-      0,
-      query['take'] ? Number(query.take) : 1000,
-    );
+    const shuffledQuestion = shuffle(
+      test.questions.map((item) => {
+        return {
+          multi:
+            item.answers.filter((item) => item.questionCorrectId !== null)
+              .length > 1
+              ? true
+              : false,
+          item,
+        };
+      }),
+    ).slice(0, query['take'] ? Number(query.take) : 1000);
 
     const { name } = test;
 
     const shuffledTest = {
+      id: test.id,
       name,
       slug,
       questions: shuffledQuestion,
@@ -84,8 +116,19 @@ export class CourseTestService {
     return shuffledTest;
   }
 
-  async findCompleteTest(testId: number, userId: number) {
-    const completeTest = await this.prisma.completeTest.findUnique({
+  async createCompleteTest(testId: number, userId: number) {
+    const completedTest = await this.prisma.completeTest.create({
+      data: {
+        testId: testId,
+        userId: userId,
+      },
+    });
+
+    return completedTest;
+  }
+
+  async getCompletedTestById(testId: number, userId: number) {
+    const completedTest = await this.prisma.completeTest.findUnique({
       where: {
         userId_testId: {
           testId: testId,
@@ -94,39 +137,41 @@ export class CourseTestService {
       },
     });
 
-    if (!completeTest) throw new NotFoundException('Не найдено');
-
-    return completeTest;
-  }
-
-  async createCompleteTest(userId: number, testId: number) {
-    const completeTest = await this.findCompleteTest(testId, userId);
-
-    if (completeTest) throw new BadRequestException('Вы уже решили этот тест');
-
-    return await this.prisma.completeTest.create({
-      data: {
-        testId: testId,
-        userId: userId,
-      },
-    });
+    return completedTest;
   }
 
   async checkTest(dto: CheckTestDto, userId: number) {
-    const courseChapter =
-      await this.courseChapterService.findCourseChapterByTestId(dto.testId);
-
-    const completeLection = await this.lectionService.findCompleteLection(
-      courseChapter.lection.id,
+    const completedTestById = await this.getCompletedTestById(
+      dto.testId,
       userId,
     );
 
-    if (!completeLection)
-      throw new BadRequestException('Вы ещё не прошли лекцию');
+    if (completedTestById)
+      throw new BadRequestException('Вы уже решили этот тест');
 
-    const completeTest = await this.findCompleteTest(dto.testId, userId);
+    const courseChapter =
+      await this.courseChapterService.getCourseChapterByTestId(dto.testId);
 
-    if (completeTest) throw new BadRequestException('Вы уже решили этот тест');
+    const completeCourseChapters =
+      await this.courseChapterService.findCompleteCourseChapters(
+        userId,
+        courseChapter.courseId,
+      );
+
+    const courseChapters =
+      await this.courseChapterService.getCourseChaptersByCourseId(
+        courseChapter.courseId,
+      );
+
+    if (courseChapters[completeCourseChapters.length].id !== courseChapter.id) {
+      throw new BadRequestException('Вам сюда рановато');
+    }
+
+    const completeLections =
+      await this.completeLection.getCompletedLectionByCourseId(
+        courseChapter.courseId,
+        userId,
+      );
 
     const questionIds = dto.userTest.map((item) => item.questId);
 
@@ -167,22 +212,26 @@ export class CourseTestService {
     });
 
     if (result.findIndex((item) => item.isCorrect == false) == -1) {
-      await this.createCompleteTest(userId, dto.testId);
+      await this.createCompleteTest(dto.testId, userId);
 
-      // const courseId = thisQuestions[0].test.courseChapter.courseId;
+      if (
+        courseChapter.lection == null ||
+        completeLections.findIndex(
+          (item) => item.lectionId == courseChapter.lection.id,
+        ) !== -1
+      ) {
+        await this.courseChapterService.completeCourseChapter(
+          courseChapter.id,
+          userId,
+        );
+      }
 
-      // const content = (await this.courseService.getById(courseId)).chapters
-      //   .map((item) => {
-      //     if (item.lection !== null && item.test !== null) return 2;
-      //     else if (item.lection !== null || item.test !== null) return 1;
-      //   })
-      //   .filter((i) => i !== undefined)
-      //   .reduce((prev, cur) => prev + cur, 0);
-
-      return true;
+      return {
+        isCorrect: true,
+      };
     }
 
-    return false;
+    throw new BadRequestException('Тест решён неверно');
   }
 
   async create(dto: TestDto) {

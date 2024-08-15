@@ -10,6 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
+import { CurrentUser } from 'src/decorators/user.decorator';
 import { CourseChapterService } from './course_chapter.service';
 import { CourseChapterDto } from './dto/course_chapter.dto';
 
@@ -23,10 +24,13 @@ export class CourseChapterController {
     return this.courseChapterService.getAll();
   }
 
-  @Auth('ADMIN')
+  @Auth('STUDENT')
   @Get('course-slug/:courseSlug')
-  getByCourseSlug(@Param('courseSlug') courseSlug: string) {
-    return this.courseChapterService.getByCourseSlug(courseSlug);
+  getByCourseSlug(
+    @Param('courseSlug') courseSlug: string,
+    @CurrentUser('id') id: string,
+  ) {
+    return this.courseChapterService.getByCourseSlug(courseSlug, Number(id));
   }
 
   @Get(':id')

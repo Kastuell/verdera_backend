@@ -25,10 +25,14 @@ export class CourseTestController {
     return this.courseTestService.getAll();
   }
 
-  @Auth('ADMIN')
+  @Auth('STUDENT')
   @Get('by-slug/:slug')
-  getBySlug(@Param('slug') slug: string, @Query() query: string) {
-    return this.courseTestService.getBySlug(slug, query);
+  getBySlug(
+    @Param('slug') slug: string,
+    @Query() query: string,
+    @CurrentUser('id') id: string,
+  ) {
+    return this.courseTestService.getBySlug(slug, query, Number(id));
   }
 
   @Get(':id')

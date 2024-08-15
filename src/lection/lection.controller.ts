@@ -30,22 +30,19 @@ export class LectionController {
     return this.lectionService.getById(Number(id));
   }
 
+  @Post('/complete-lection/:slug')
   @Auth('STUDENT')
-  @Get('/by-slug/:slug')
-  getBySlug(@CurrentUser('id') id: string, @Param('slug') slug: string) {
-    return this.lectionService.getBySlug(Number(id), slug);
+  createCompletedLection(
+    @Param('slug') slug: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.lectionService.createCompleteLection(slug, Number(userId));
   }
 
   @Auth('STUDENT')
-  @Post('complete-lection/:id')
-  createCompleteLection(
-    @CurrentUser('id') userId: string,
-    @Param('id') id: string,
-  ) {
-    return this.lectionService.createCompleteLection(
-      Number(id),
-      Number(userId),
-    );
+  @Get('/by-slug/:slug')
+  getBySlug(@CurrentUser('id') id: string, @Param('slug') slug: string) {
+    return this.lectionService.getBySlug(slug, Number(id));
   }
 
   @Post()

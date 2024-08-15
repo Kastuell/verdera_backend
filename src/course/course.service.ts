@@ -40,6 +40,7 @@ export class CourseService {
     return boughtCourses;
   }
 
+
   async getMyCourses(userId: number) {
     const boughtCourses = await this.getBoughtCoursesByUserId(userId);
 
@@ -57,32 +58,7 @@ export class CourseService {
       },
     });
 
-    const mappedCourses = myCourses.map(async (item) => {
-      const { chapters: chpt, id, BoughtCourses, ...rest } = item;
-
-      const courseChaptersCompleted =
-        await this.courseChapterService.findCompleteCourseChapters(userId, id);
-
-      const chapters = chpt.map((item) => {
-        return courseChaptersCompleted.findIndex(
-          (item) => item.courseChapterId == item.courseChapterId,
-        ) !== -1
-          ? { item, userCompleted: true, access: true }
-          : { item, userCompleted: false, access: false };
-      });
-
-      const index = chapters.findIndex((item) => item.userCompleted == false);
-
-      chapters[index].access = true;
-
-      return {
-        id,
-        chapters,
-        ...rest,
-      };
-    });
-
-    return Promise.all(mappedCourses);
+    return myCourses;
   }
 
   async getById(id: number) {

@@ -4,9 +4,14 @@ export const returnTestObject: Prisma.TestSelect = {
   id: true,
   name: true,
   questions: {
-    select: {
-      id: true,
-    },
+    select:{
+      name: true,
+      correctAnswers: {
+        select: {
+          value: true
+        }
+      }
+    }
   },
 
   slug: true,
