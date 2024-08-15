@@ -169,7 +169,7 @@ export class AuthService {
   removeTokensFromResponse(res: Response) {
     res.cookie(this.REFRESH_TOKEN_NAME, '', {
       httpOnly: true,
-      domain: 'localhost',
+      domain: process.env.DOMAIN,
       expires: new Date(0),
       secure: true,
       // lax if production
@@ -177,7 +177,7 @@ export class AuthService {
     });
     res.cookie(this.ACCESS_TOKEN_NAME, '', {
       httpOnly: true,
-      domain: 'localhost',
+      domain: process.env.DOMAIN,
       expires: new Date(0),
       secure: true,
       // lax if production
