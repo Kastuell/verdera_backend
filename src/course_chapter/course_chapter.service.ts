@@ -48,6 +48,20 @@ export class CourseChapterService {
       orderBy: {
         id: 'asc',
       },
+      select: {
+        lection: {
+          select: {
+            id: true,
+            courseChapterId: true
+          },
+        },
+        test: {
+          select: {
+            id: true,
+          },
+        },
+        id: true
+      },
     });
 
     return courseChapters;
@@ -108,6 +122,24 @@ export class CourseChapterService {
         lection: true,
         id: true,
         courseId: true,
+        course: {
+          select: {
+            chapters: {
+              select: {
+                lection: {
+                  select: {
+                    id: true,
+                  },
+                },
+                test: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: {
         id: 'asc',

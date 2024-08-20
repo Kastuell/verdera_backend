@@ -70,7 +70,20 @@ export class CourseTestService {
         courseChapter.courseId,
       );
 
-    if (courseChapters[completeCourseChapters.length].id !== courseChapter.id) {
+    const completeLections =
+      await this.completeLection.getCompletedLectionByCourseId(
+        courseChapter.courseId,
+        userId,
+      );
+
+    const curLectionId = courseChapters.find(
+      (item) => item.lection.courseChapterId == courseChapter.id,
+    ).id;
+
+    if (
+      courseChapters[completeCourseChapters.length].id !== courseChapter.id ||
+      completeLections.findIndex((item) => item.lectionId == curLectionId) == -1
+    ) {
       throw new BadRequestException('Вам сюда рановато');
     }
     const test = await this.prisma.test.findUnique({
