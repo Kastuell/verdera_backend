@@ -1,0 +1,46 @@
+model ScheduleWeek {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    days SheduleDay[]
+}
+
+model SheduleDay {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    date DateTime
+
+    time SheduleTime[]
+
+    scheduleWeek   ScheduleWeek? @relation(fields: [scheduleWeekId], references: [id])
+    scheduleWeekId Int?
+}
+
+model SheduleTime {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    time String
+
+    status SheduleTimeEnum @default(FREE)
+
+    student   User? @relation(fields: [studentId], references: [id], "scheduleTimeStudent")
+    studentId Int?
+
+    teacher   User? @relation(fields: [teacherId], references: [id], "scheduleTimeTeacher")
+    teacherId Int?
+
+    sheduleDay   SheduleDay? @relation(fields: [sheduleDayId], references: [id])
+    sheduleDayId Int?
+}
+
+enum SheduleTimeEnum {
+    FREE
+    PENDING
+    SELECTED
+    END
+}

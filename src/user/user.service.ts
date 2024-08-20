@@ -1,18 +1,26 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { EnumUserRoles } from '@prisma/client';
 import { hash } from 'argon2';
 import { AuthRegisterDto } from 'src/auth/dto/auth.dto';
+import { LocalFileDto } from 'src/local_file/dto/localFile.dto';
+import { LocalFileService } from 'src/local_file/local_file.service';
 import { PrismaService } from 'src/prisma.service';
 import { UserUpdateDto } from './dto/user.dto';
 import { returnUserObject } from './return-user.object';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => LocalFileService))
+    private readonly localFileService: LocalFileService,
+  ) {}
 
   async getAll() {
     const users = await this.prisma.user.findMany({
@@ -56,6 +64,18 @@ export class UserService {
     if (!user) throw new NotFoundException('Пользователь не найден');
 
     return user;
+  }
+
+  async addAvatar(userId: number, dto: LocalFileDto) {
+    const avatar = await this.localFileService.saveLocalFileData(dto);
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        avatarId: avatar.id,
+      },
+    });
   }
 
   async checkEmail(email: string) {
@@ -108,7 +128,6 @@ export class UserService {
     const user = await this.prisma.user.create({
       data: {
         password: await hash(password),
-        avatar: '',
         role: EnumUserRoles.USER,
         active: true,
         ...rest,

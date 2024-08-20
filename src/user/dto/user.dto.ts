@@ -22,9 +22,6 @@ export class UserDto implements Prisma.UserUpdateInput {
 
   @IsString()
   password: string;
-
-  @IsString()
-  avatar: string;
 }
 
 export class UserUpdateDto implements Prisma.UserUpdateInput {
@@ -43,8 +40,5 @@ export class UserUpdateDto implements Prisma.UserUpdateInput {
   @IsOptional()
   @IsString()
   phone: string;
-
-  @IsOptional()
-  @IsString()
-  avatar: string;
 }
+

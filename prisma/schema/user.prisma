@@ -11,12 +11,18 @@ model User {
     password String
     social   String
     region   String
-    avatar   String
     birthday String
 
     active Boolean
 
     role EnumUserRoles
+
+    avatar   LocalFile? @relation(fields: [avatarId], references: [id]) // references `id` of `Profile`
+    avatarId Int?       @unique // relation scalar field (used in the `@relation` attribute above)
+
+    scheduleTimeStudent SheduleTime[] @relation("scheduleTimeStudent")
+
+    scheduleTimeTeacher SheduleTime[] @relation("scheduleTimeTeacher")
 
     completeTests          CompleteTest[]
     completeLection        CompleteLections[]
@@ -28,7 +34,6 @@ model User {
     orders   Order[]
     supports Support[]
 }
-
 
 enum EnumUserRoles {
     USER

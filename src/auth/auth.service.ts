@@ -14,7 +14,7 @@ import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto';
 @Injectable()
 export class AuthService {
   EXPIRE_DAYS_REFRESH_TOKEN = 30;
-  EXPIRE_HOURS_ACCESS_TOKEN = 1;
+  EXPIRE_HOURS_ACCESS_TOKEN = 24;
   REFRESH_TOKEN_NAME = 'refreshToken';
   ACCESS_TOKEN_NAME = 'accessToken';
 
@@ -51,7 +51,6 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         password: await hash(password),
-        avatar: '',
         role: EnumUserRoles.USER,
         active: true,
         ...rest,

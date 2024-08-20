@@ -97,7 +97,7 @@ export class ProductService {
 
     const oldProduct = this.getById(productId);
 
-    if (oldProduct)
+    if (!oldProduct)
       throw new NotFoundException(`Товар под номером ${productId} не найден`);
 
     const product = await this.prisma.product.update({
