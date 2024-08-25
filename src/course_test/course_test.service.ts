@@ -81,8 +81,9 @@ export class CourseTestService {
     ).id;
 
     if (
-      courseChapters[completeCourseChapters.length].id !== courseChapter.id ||
-      completeLections.findIndex((item) => item.lectionId == curLectionId) == -1
+      // courseChapters[completeCourseChapters.length].id !== courseChapter.id ||
+      // completeLections.findIndex((item) => item.lectionId == curLectionId) == -1
+      false
     ) {
       throw new BadRequestException('Вам сюда рановато');
     }
@@ -104,7 +105,18 @@ export class CourseTestService {
     });
     if (!test) throw new NotFoundException('Тест не найден');
 
-    const shuffledQuestion = shuffle(
+    const shuffledQuestion: {
+      multi: boolean;
+      item: {
+        id: number;
+        name: string;
+        answers: {
+          id: number;
+          value: string;
+          questionCorrectId: null | number;
+        }[];
+      };
+    }[] = shuffle(
       test.questions.map((item) => {
         const { answers, ...rest } = item;
         return {
@@ -127,7 +139,22 @@ export class CourseTestService {
       id: test.id,
       name,
       slug,
-      questions: shuffledQuestion,
+      questions: shuffledQuestion.map((i) => {
+        const { item } = i;
+        const { answers, ...rest } = item;
+        return {
+          multi: i.multi,
+          item: {
+            ...rest,
+            answers: answers.map((k) => {
+              return {
+                id: k.id,
+                value: k.value,
+              };
+            }),
+          },
+        };
+      }),
     };
 
     return shuffledTest;
