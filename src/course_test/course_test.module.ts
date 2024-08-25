@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CourseService } from 'src/course/course.service';
 import { CourseChapterService } from 'src/course_chapter/course_chapter.service';
 import { LectionService } from 'src/lection/lection.service';
 import { PrismaService } from 'src/prisma.service';
@@ -13,7 +14,8 @@ import { CourseTestService } from './course_test.service';
     PrismaService,
     CourseChapterService,
     QuestionService,
-    LectionService
+    LectionService,
+    CourseService
   ],
 })
 export class CourseTestModule {}

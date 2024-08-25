@@ -3,30 +3,40 @@ model ScheduleWeek {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    days SheduleDay[]
+    week_start_meta String
+    week_end_meta   String
+
+    week_start String
+    week_end   String
+
+    days ScheduleDay[]
 }
 
-model SheduleDay {
+model ScheduleDay {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    date DateTime
+    date String @unique
 
-    time SheduleTime[]
+    day_of_week String
 
-    scheduleWeek   ScheduleWeek? @relation(fields: [scheduleWeekId], references: [id])
+    day_month String
+
+    time ScheduleTime[]
+
+    scheduleWeek   ScheduleWeek? @relation(fields: [scheduleWeekId], references: [id], onDelete: Cascade)
     scheduleWeekId Int?
 }
 
-model SheduleTime {
+model ScheduleTime {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
     time String
 
-    status SheduleTimeEnum @default(FREE)
+    status ScheduleTimeEnum @default(FREE)
 
     student   User? @relation(fields: [studentId], references: [id], "scheduleTimeStudent")
     studentId Int?
@@ -34,11 +44,11 @@ model SheduleTime {
     teacher   User? @relation(fields: [teacherId], references: [id], "scheduleTimeTeacher")
     teacherId Int?
 
-    sheduleDay   SheduleDay? @relation(fields: [sheduleDayId], references: [id])
-    sheduleDayId Int?
+    sheduleDay    ScheduleDay? @relation(fields: [scheduleDayId], references: [id])
+    scheduleDayId Int?
 }
 
-enum SheduleTimeEnum {
+enum ScheduleTimeEnum {
     FREE
     PENDING
     SELECTED

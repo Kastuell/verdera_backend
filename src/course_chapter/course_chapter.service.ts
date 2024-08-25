@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CourseService } from 'src/course/course.service';
 import { PrismaService } from 'src/prisma.service';
 import { CourseChapterDto } from './dto/course_chapter.dto';
 import { returnCourseChapterObject } from './return-course_chapter.object';
 
 @Injectable()
 export class CourseChapterService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private courseService: CourseService,
+  ) {}
 
   async getAll() {
     const courseChapter = await this.prisma.courseChapter.findMany({
@@ -52,7 +56,8 @@ export class CourseChapterService {
         lection: {
           select: {
             id: true,
-            courseChapterId: true
+            courseChapterId: true,
+            slug: true
           },
         },
         test: {
@@ -60,7 +65,7 @@ export class CourseChapterService {
             id: true,
           },
         },
-        id: true
+        id: true,
       },
     });
 
@@ -165,6 +170,35 @@ export class CourseChapterService {
   //   return compelteCourseChapter;
   // }
 
+  async getCourseChaptersByCourseChapterId(courseChapterId: number) {
+    const courseId = await this.prisma.courseChapter
+      .findUnique({
+        where: {
+          id: courseChapterId,
+        },
+      })
+      .then((item) => item.courseId);
+
+    const courseChapters = await this.prisma.courseChapter.findMany({
+      where: {
+        course: {
+          id: courseId,
+        },
+      },
+      select: {
+        lection: true,
+        test: true,
+        id: true,
+        courseId: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    return courseChapters;
+  }
+
   async completeCourseChapter(courseChapterId: number, userId: number) {
     const compelteCourseChapter =
       await this.prisma.completeCourseChapters.create({
@@ -173,7 +207,25 @@ export class CourseChapterService {
           userId: userId,
         },
       });
-    return compelteCourseChapter;
+
+    const allCourseChapters =
+      await this.getCourseChaptersByCourseChapterId(courseChapterId);
+
+    if (allCourseChapters[allCourseChapters.length - 1].id == courseChapterId) {
+      const completeCourse = await this.courseService.createCompleteCourse(
+        allCourseChapters[0].courseId,
+        userId,
+      );
+
+      const qwe = {
+        ...completeCourse,
+        completed: true,
+      }
+
+      return qwe
+    } else {
+      return compelteCourseChapter;
+    }
   }
 
   async getByCourseSlug(courseSlug: string, userId: number) {

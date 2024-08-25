@@ -106,13 +106,17 @@ export class CourseTestService {
 
     const shuffledQuestion = shuffle(
       test.questions.map((item) => {
+        const { answers, ...rest } = item;
         return {
           multi:
             item.answers.filter((item) => item.questionCorrectId !== null)
               .length > 1
               ? true
               : false,
-          item,
+          item: {
+            ...rest,
+            answers: shuffle(answers),
+          },
         };
       }),
     ).slice(0, query['take'] ? Number(query.take) : 1000);
@@ -241,10 +245,17 @@ export class CourseTestService {
 
       return {
         isCorrect: true,
+        nextLectionSlug:
+          courseChapters[completeCourseChapters.length + 1].lection.slug,
+        testSlug: courseChapter.test.slug,
       };
     }
 
-    throw new BadRequestException('Тест решён неверно');
+    return {
+      isCorrect: false,
+      curLectionSlug: courseChapter.lection.slug,
+      testSlug: courseChapter.test.slug,
+    };
   }
 
   async create(dto: TestDto) {

@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CourseChapterService } from 'src/course_chapter/course_chapter.service';
 import { PrismaService } from 'src/prisma.service';
 import translit from 'src/utils/generate-slug';
 import { CourseDto } from './dto/course.dto';
@@ -9,7 +8,6 @@ import { returnCourseObject } from './return-course.object';
 export class CourseService {
   constructor(
     private prisma: PrismaService,
-    private courseChapterService: CourseChapterService,
   ) {}
 
   async getAll() {
@@ -40,7 +38,6 @@ export class CourseService {
     return boughtCourses;
   }
 
-
   async getMyCourses(userId: number) {
     const boughtCourses = await this.getBoughtCoursesByUserId(userId);
 
@@ -59,6 +56,17 @@ export class CourseService {
     });
 
     return myCourses;
+  }
+
+  async createCompleteCourse(courseId: number, userId: number) {
+    const completeCourse = await this.prisma.completeCourses.create({
+      data: {
+        courseId: courseId,
+        userId: userId,
+      },
+    });
+
+    return completeCourse;
   }
 
   async getById(id: number) {

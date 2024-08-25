@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request as RequestType } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from 'src/prisma.service';
+import { returnUserObject } from 'src/user/return-user.object';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -36,6 +37,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: req.id,
+      },
+      select: {
+        ...returnUserObject,
       },
     });
     return user;

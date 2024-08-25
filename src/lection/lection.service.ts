@@ -47,7 +47,13 @@ export class LectionService {
       select: {
         courseChapter: {
           select: {
+            id: true,
             courseId: true,
+            test: {
+              select: {
+                slug: true,
+              },
+            },
           },
         },
         id: true,
@@ -58,7 +64,17 @@ export class LectionService {
       },
     });
 
-    return lection;
+    const completedCourseChapters =
+      await this.courseChapterService.findCompleteCourseChapters(
+        userId,
+        lection.courseChapter.courseId,
+      );
+    const courseChapterCompleted =
+    completedCourseChapters.findIndex(
+        (item) => item.courseChapterId == lection.courseChapter.id,
+      ) !== -1;
+
+    return { ...lection, courseChapterCompleted: courseChapterCompleted };
   }
 
   async createCompleteLection(slug: string, userId: number) {
@@ -78,7 +94,7 @@ export class LectionService {
       await this.courseChapterService.getCourseChapterByLectionId(qwe.id);
 
     if (courseChapter.test == null) {
-      await this.courseChapterService.completeCourseChapter(
+      const qwe = await this.courseChapterService.completeCourseChapter(
         courseChapter.id,
         userId,
       );
