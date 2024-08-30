@@ -353,7 +353,7 @@ export class ScheduleService {
     });
 
     await this.botUpdate.notificate(
-      [867176416],
+      [867176416,461422689],
       `Студент: ${family} ${name} ${surname} ⏳\n\nC почтой: ${email}\n\nC телефоном: ${phone}\n\nЗаписался на ${moment(selectedTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${selectedTime.time}`,
     );
 
@@ -416,7 +416,7 @@ export class ScheduleService {
     });
 
     await this.botUpdate.notificate(
-      [867176416],
+      [867176416,461422689],
       `Вы: ${family} ${name} ${surname} ✅\n\nПодтвердили запись студента: ${approvedTime.student.family} ${approvedTime.student.name} ${approvedTime.student.surname} на ${moment(approvedTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${approvedTime.time}`,
     );
 
@@ -478,7 +478,7 @@ export class ScheduleService {
       });
 
       await this.botUpdate.notificate(
-        [867176416],
+        [867176416,461422689],
         `Студент: ${family} ${name} ${surname} ❌\n\nC почтой: ${email}\n\nC телефоном: ${phone}\n\nОтменил запись на ${moment(canceledTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${canceledTime.time}`,
       );
 
