@@ -56,7 +56,7 @@ export class UserController {
       callback(null, true);
     },
     limits: {
-      fileSize: Math.pow(1024, 10) // 1MB
+      fileSize: 5242880
     }
   }))
   async addAvatar(

@@ -1,8 +1,8 @@
 import {
-    CanActivate,
-    ExecutionContext,
-    ForbiddenException,
-    Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
 } from '@nestjs/common';
 import { CompleteCourses, User } from '@prisma/client';
 
@@ -15,7 +15,12 @@ export class ScheduleAccess implements CanActivate {
     const user = request.user;
 
     if (!user) throw new ForbiddenException('У вас нет прав!');
-    
-    if (user.completeCourses.length !== 0) return true;
+
+    if (
+      user.completeCourses.length !== 0 ||
+      user.role == 'ADMIN' ||
+      user.role == 'TEACHER'
+    )
+      return true;
   }
 }

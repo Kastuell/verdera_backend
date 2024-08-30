@@ -6,6 +6,7 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import 'moment/locale/ru';
+import { BotUpdate } from 'src/bot/bot.update';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { TimeDto } from './dto/schedule.dto';
@@ -20,6 +21,7 @@ export class ScheduleService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
+    private botUpdate: BotUpdate,
   ) {}
 
   // @Cron(CronExpression.EVERY_SECOND)
@@ -302,12 +304,18 @@ export class ScheduleService {
   async selectTime(timeId: number, studentId: number) {
     const time = await this.getTimeById(timeId);
 
-    const { scheduleTimeStudent: wqe } =
-      await this.userService.getById(studentId);
+    const {
+      scheduleTimeStudent: wqe,
+      email,
+      phone,
+      name,
+      family,
+      surname,
+    } = await this.userService.getById(studentId);
 
     const scheduleTimeStudent = wqe ?? [];
 
-    const alreadySelected = scheduleTimeStudent.map(
+    const alreadySelected = scheduleTimeStudent.filter(
       (item) => item.status == 'PENDING' || item.status == 'SELECTED',
     );
 
@@ -334,7 +342,20 @@ export class ScheduleService {
         },
         status: 'PENDING',
       },
+      select: {
+        sheduleDay: {
+          select: {
+            date: true,
+          },
+        },
+        time: true,
+      },
     });
+
+    await this.botUpdate.notificate(
+      [867176416],
+      `Студент: ${family} ${name} ${surname} ⏳\n\nC почтой: ${email}\n\nC телефоном: ${phone}\n\nЗаписался на ${moment(selectedTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${selectedTime.time}`,
+    );
 
     return selectedTime;
   }
@@ -358,11 +379,17 @@ export class ScheduleService {
   }
 
   /// only for teachers
-  async approveTime(timeId: number) {
+  async approveTime(timeId: number, userId: number) {
     const time = await this.getTimeById(timeId);
 
     if (time.status !== 'PENDING')
       throw new BadRequestException('Статус времени не PENDING');
+
+    if (time.teacherId !== userId)
+      throw new BadRequestException('Вы не можете подтвердить не Ваше время');
+
+    const { role, email, phone, name, family, surname } =
+      await this.userService.getById(userId);
 
     const approvedTime = await this.prisma.scheduleTime.update({
       where: {
@@ -371,32 +398,41 @@ export class ScheduleService {
       data: {
         status: 'SELECTED',
       },
-    });
-
-    return approvedTime;
-  }
-
-  async getTimeById(timeId: number) {
-    const time = await this.prisma.scheduleTime.findUnique({
-      where: {
-        id: timeId,
+      select: {
+        sheduleDay: {
+          select: {
+            date: true,
+          },
+        },
+        time: true,
+        student: {
+          select: {
+            name: true,
+            family: true,
+            surname: true,
+          },
+        },
       },
     });
 
-    if (!time) throw new NotFoundException('Время не найдено');
+    await this.botUpdate.notificate(
+      [867176416],
+      `Вы: ${family} ${name} ${surname} ✅\n\nПодтвердили запись студента: ${approvedTime.student.family} ${approvedTime.student.name} ${approvedTime.student.surname} на ${moment(approvedTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${approvedTime.time}`,
+    );
 
-    return time;
+    return approvedTime;
   }
 
   async cancelTime(timeId: number, userId: number) {
     const time = await this.getTimeById(timeId);
 
-    const user = await this.userService.getById(userId);
+    const { role, email, phone, name, family, surname } =
+      await this.userService.getById(userId);
 
     if (!time.studentId)
-      throw new BadRequestException('На это никто не записан');
+      throw new BadRequestException('На это время никто не записан');
 
-    if (user.role == 'ADMIN' || user.role == 'TEACHER') {
+    if (role == 'ADMIN' || role == 'TEACHER') {
       const canceledTime = await this.prisma.scheduleTime.update({
         where: {
           id: timeId,
@@ -412,12 +448,12 @@ export class ScheduleService {
       });
 
       return canceledTime;
-    } else if (user.role == 'STUDENT') {
+    } else if (role == 'STUDENT') {
       if (time.studentId !== userId)
         throw new BadRequestException('У вас нет доступа к этому времени');
 
-      if (time.status !== 'PENDING')
-        throw new BadRequestException('Вы не можете отменить это время');
+      // if (time.status !== 'PENDING')
+      //   throw new BadRequestException('Вы не можете отменить это время, так как статус заявки "На рассмотрении"');
 
       const canceledTime = await this.prisma.scheduleTime.update({
         where: {
@@ -431,9 +467,34 @@ export class ScheduleService {
           },
           status: 'FREE',
         },
+        select: {
+          sheduleDay: {
+            select: {
+              date: true,
+            },
+          },
+          time: true,
+        },
       });
+
+      await this.botUpdate.notificate(
+        [867176416],
+        `Студент: ${family} ${name} ${surname} ❌\n\nC почтой: ${email}\n\nC телефоном: ${phone}\n\nОтменил запись на ${moment(canceledTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${canceledTime.time}`,
+      );
 
       return canceledTime;
     }
+  }
+
+  async getTimeById(timeId: number) {
+    const time = await this.prisma.scheduleTime.findUnique({
+      where: {
+        id: timeId,
+      },
+    });
+
+    if (!time) throw new NotFoundException('Время не найдено');
+
+    return time;
   }
 }

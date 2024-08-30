@@ -81,9 +81,8 @@ export class CourseTestService {
     ).id;
 
     if (
-      // courseChapters[completeCourseChapters.length].id !== courseChapter.id ||
-      // completeLections.findIndex((item) => item.lectionId == curLectionId) == -1
-      false
+      courseChapters[completeCourseChapters.length].id !== courseChapter.id ||
+      completeLections.findIndex((item) => item.lectionId == curLectionId) == -1
     ) {
       throw new BadRequestException('Вам сюда рановато');
     }

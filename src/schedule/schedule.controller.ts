@@ -104,8 +104,11 @@ export class ScheduleController {
 
   @Auth('TEACHER')
   @Put('time/approve/:id')
-  async approveTime(@Param('id') timeId: string) {
-    return await this.scheduleService.approveTime(Number(timeId));
+  async approveTime(
+    @Param('id') timeId: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return await this.scheduleService.approveTime(Number(timeId),Number(userId));
   }
 
   @Auth('STUDENT')

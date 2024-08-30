@@ -8,9 +8,9 @@ export const returnTimeObject: Prisma.ScheduleTimeSelect = {
   time: true,
   sheduleDay: {
     select: {
-      date: true
-    }
-  }
+      date: true,
+    },
+  },
 };
 
 export const returnDayObject: Prisma.ScheduleDaySelect = {
@@ -22,6 +22,9 @@ export const returnDayObject: Prisma.ScheduleDaySelect = {
   time: {
     select: {
       ...returnTimeObject,
+    },
+    orderBy: {
+      time: 'asc',
     },
   },
 };

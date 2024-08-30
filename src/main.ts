@@ -2,11 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma.service';
-
 async function bootstrap() {
   const PORT = process.env.PORT || 7000;
 
   const app = await NestFactory.create(AppModule);
+
+  
 
   app.setGlobalPrefix('api');
   app.getHttpAdapter().getInstance().disable('x-powered-by');
@@ -15,7 +16,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000/',
-      "http://localhost:3000",
+      'http://localhost:3000',
       'https://www.verdera.ru/',
       'https://verdera.ru/',
     ],

@@ -13,6 +13,8 @@ model User {
     region   String
     birthday String
 
+    tg_id String?
+
     active Boolean
 
     role EnumUserRoles
