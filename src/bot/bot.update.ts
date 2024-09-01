@@ -1,4 +1,4 @@
-import { InjectBot, Start, Update } from 'nestjs-telegraf';
+import { InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 import { BotService } from './bot.service';
 
@@ -12,6 +12,16 @@ export class BotUpdate {
   @Start()
   async startBot(ctx: Context) {
     await ctx.reply('Ку!');
+    ctx.reply('Send me your number please', {
+      reply_markup: {
+        keyboard: [[{ text: '📲 Send phone number', request_contact: true }]],
+      },
+    });
+  }
+
+  @On('contact')
+  async contact(ctx: Context) {
+    console.log(ctx.message);
   }
 
   async notificate(userTgId: number[], message: string) {
@@ -20,4 +30,16 @@ export class BotUpdate {
     );
   }
 }
+// политика конфидент
+// видос айфон
+// FAQ форма DONE
+// расписание адаптив DONE
+// подробнее о товаре зелёные квадратики DONE
+// стрелочка наверх
+// убрать ватсап DONE
+// заказы DONE
+// шапка каталога DONE
 
+// комплектация красивая комплектация
+
+// 3 видео и тесты сертификат

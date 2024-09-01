@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
-import { SupportDto } from './dto/support.dto';
+import { SupportDto, SupportDtoUnAuth } from './dto/support.dto';
 
 @Injectable()
 export class SupportService {
@@ -27,6 +27,16 @@ export class SupportService {
         user: {
           connect: { id: userId },
         },
+      },
+    });
+
+    return support;
+  }
+
+  async createUnAuth(dto: SupportDtoUnAuth) {
+    const support = await this.prisma.support.create({
+      data: {
+        ...dto,
       },
     });
 

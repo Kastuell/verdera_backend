@@ -15,6 +15,7 @@ export const returnOrdersObject: Prisma.OrderSelect = {
           subName: true,
           img: true,
           price: true,
+          description: true,
         },
       },
     },
