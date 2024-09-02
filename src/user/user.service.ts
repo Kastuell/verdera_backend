@@ -22,6 +22,39 @@ export class UserService {
     private readonly localFileService: LocalFileService,
   ) {}
 
+  async addTgId(tgId: string, userId: number) {
+    const user = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        tg_id: tgId,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
+
+    const { password, ...res } = user;
+
+    return res;
+  }
+
+  async getByPhoneNumber(phoneNumber: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        phone: phoneNumber,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
+
+    if (!user) throw new NotFoundException('Пользователь не найден');
+
+    return user;
+  }
+
   async getAll() {
     const users = await this.prisma.user.findMany({
       select: {

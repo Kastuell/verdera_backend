@@ -15,6 +15,7 @@ export const returnUserObject: Prisma.UserSelect = {
   supports: true,
   region: true,
   social: true,
+  tg_id: true,
   scheduleTimeStudent: {
     select: {
       status: true,

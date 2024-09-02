@@ -7,7 +7,7 @@ model User {
     name     String
     surname  String
     family   String
-    phone    String
+    phone    String @unique
     password String
     social   String
     region   String
