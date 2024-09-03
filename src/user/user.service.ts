@@ -22,6 +22,31 @@ export class UserService {
     private readonly localFileService: LocalFileService,
   ) {}
 
+  async getByChatId(chatId: string) {
+    const user = await this.prisma.user.findMany({
+      where: {
+        tg_id: chatId,
+      },
+      select: {
+        ...returnUserObject,
+        boughtCourses: {
+          select: {
+            course: {
+              select: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) throw new NotFoundException('Пользователь не найден');
+
+    return user[0];
+  }
+
   async addTgId(tgId: string, userId: number) {
     const user = await this.prisma.user.update({
       where: {

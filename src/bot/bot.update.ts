@@ -1,13 +1,11 @@
-import { InjectBot, On, Start, Update } from 'nestjs-telegraf';
+import { Action, InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { UserService } from 'src/user/user.service';
-import { Context, Telegraf } from 'telegraf';
-import { BotService } from './bot.service';
+import { Context, Markup, Telegraf } from 'telegraf';
 
 @Update()
 export class BotUpdate {
   constructor(
     @InjectBot() readonly bot: Telegraf<Context>,
-    private readonly botService: BotService,
     private userService: UserService,
   ) {}
 
@@ -15,12 +13,12 @@ export class BotUpdate {
   async startBot(ctx: Context) {
     await ctx.reply('Ку!');
 
-    ctx.reply('Поделитесь номером для работы бота', {
-      reply_markup: {
-        keyboard: [[{ text: '📲 Поделиться номером', request_contact: true }]],
-        one_time_keyboard: true,
-      },
-    });
+    ctx.reply(
+      'Поделитесь номером для работы бота',
+      Markup.keyboard([
+        Markup.button.contactRequest('📲 Поделиться номером', true),
+      ]),
+    );
   }
 
   @On('contact')
@@ -30,16 +28,73 @@ export class BotUpdate {
       ctx.message.contact.phone_number,
     );
 
-    if (user.tg_id) {
-      await ctx.reply('Вы уже делились номером');
+    if (!user) {
+      await ctx.reply(
+        'Вас нет в базе данных Verdera, сначала зарегистрируйтесь на verdera.ru',
+      );
+    } else {
+      if (user.role == 'USER') {
+        await ctx.reply('У вас нет подходящей роли');
+      } else {
+        if (user.tg_id) {
+          if (user.role == 'ADMIN') {
+            // await ctx.reply(
+            //   'Получить лекции?',
+            //   Markup.keyboard([
+            //     Markup.button.callback('Да', '/lections', true),
+            //     Markup.button.callback('Нет', '1', true),
+            //   ]),
+            // );
+            return ctx.reply(
+              'Получить лекции?',
+              Markup.keyboard([
+                Markup.button.callback('Да', '/lections', true),
+              ]),
+            );
+          }
+        } else {
+          await this.userService.addTgId(
+            ctx.message.chat.id.toString(),
+            user.id,
+          );
+          await ctx.reply('Ваш tg id успешно добавлен в базу данных!');
+        }
+      }
     }
-
-    if (!user) await ctx.reply('Вас нет в базе данных Verdera');
-
-    await this.userService.addTgId(ctx.message.chat.id.toString(), user.id);
-
-    await ctx.reply('Ваш tg id успешно добавлен в базу данных!');
   }
+
+  @Action('lections')
+  async lections(ctx: Context) {
+    console.log('qwe');
+    const user = await this.userService.getByChatId(
+      // @ts-ignore
+      ctx.message.from.id.toString(),
+    );
+
+    if (!user) {
+      await ctx.reply(
+        'Вас нет в базе данных Verdera, сначала зарегистрируйтесь на verdera.ru',
+      );
+    } else {
+      if (user.role !== 'STUDENT' && user.role !== 'ADMIN') {
+        await ctx.reply('Вы не являетесь студентом Verdera');
+      } else {
+        await ctx.reply(
+          'К какой лекции вы хотите получить материалы?',
+          Markup.keyboard(
+            user.boughtCourses.map((item) =>
+              Markup.button.callback(item.course.name, 'lection', true),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // @Action('lection')
+  // async lection(ctx: Context) {
+  //   console.log(ctx);
+  // }
 
   async notificate(userTgId: number[], message: string) {
     userTgId.map(

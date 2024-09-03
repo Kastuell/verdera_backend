@@ -70,7 +70,7 @@ export class LectionService {
         lection.courseChapter.courseId,
       );
     const courseChapterCompleted =
-    completedCourseChapters.findIndex(
+      completedCourseChapters.findIndex(
         (item) => item.courseChapterId == lection.courseChapter.id,
       ) !== -1;
 
