@@ -57,7 +57,7 @@ export class CourseChapterService {
           select: {
             id: true,
             courseChapterId: true,
-            slug: true
+            slug: true,
           },
         },
         test: {
@@ -220,9 +220,9 @@ export class CourseChapterService {
       const qwe = {
         ...completeCourse,
         completed: true,
-      }
+      };
 
-      return qwe
+      return qwe;
     } else {
       return compelteCourseChapter;
     }
@@ -259,7 +259,8 @@ export class CourseChapterService {
     return mapped.map((item, index) => {
       return {
         ...item,
-        unlocked: index <= temp ? true : false,
+        unlocked:
+          index <= (temp == -1 ? mapped.length - 1 : temp) ? true : false,
       };
     });
   }

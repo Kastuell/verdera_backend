@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class LectionDto implements Prisma.LectionUpdateInput {
   @IsString()
@@ -7,10 +7,6 @@ export class LectionDto implements Prisma.LectionUpdateInput {
 
   @IsString()
   source: string;
-
-  @IsArray()
-  @IsNotEmpty()
-  materials: string[];
 
   @IsNumber()
   courseChapterId: number;

@@ -1,5 +1,4 @@
-
-model LocalFile  {
+model LocalFile {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
@@ -11,4 +10,7 @@ model LocalFile  {
     mimetype String
 
     user User?
+
+    lection   Lection? @relation(fields: [lectionId], references: [id])
+    lectionId Int?     @unique
 }

@@ -35,6 +35,7 @@ export class UserService {
               select: {
                 name: true,
                 id: true,
+                slug: true,
               },
             },
           },

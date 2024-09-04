@@ -1,9 +1,9 @@
 import { Ctx, Hears, InjectBot, Update } from 'nestjs-telegraf';
 import { UserService } from 'src/user/user.service';
-import { Context, Markup, Telegraf } from 'telegraf';
-import { studentButtons } from '../buttons/student.buttons';
-import { WizardScene } from 'telegraf/typings/scenes';
+import { Telegraf } from 'telegraf';
 import { BotContext } from '../bot.context';
+import { studentButtons } from '../buttons/student.buttons';
+import { GET_LECTIONS } from '../scenes/scenes.constants';
 
 @Update()
 export class BotStudentUpdate {
@@ -27,7 +27,7 @@ export class BotStudentUpdate {
       if (user.role !== 'STUDENT' && user.role !== 'ADMIN') {
         await ctx.reply('Вы не являетесь студентом Verdera');
       } else {
-        await ctx.scene.enter('get_lections')
+        await ctx.scene.enter(GET_LECTIONS)
       }
     }
   }

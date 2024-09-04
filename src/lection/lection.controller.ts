@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -6,11 +7,14 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
 import { CurrentUser } from 'src/decorators/user.decorator';
+import { LocalFilesInterceptor } from 'src/local_file/localFile.interceptor';
 import { LectionDto } from './dto/lection.dto';
 import { LectionService } from './lection.service';
 
@@ -63,5 +67,34 @@ export class LectionController {
   @Auth('ADMIN')
   delete(@Param('id') id: string) {
     return this.lectionService.delete(Number(id));
+  }
+
+  @Post('materials/:id')
+  @Auth()
+  @UseInterceptors(
+    LocalFilesInterceptor({
+      fieldName: 'file',
+      path: '/lections',
+      fileFilter: (request, file, callback) => {
+        // if (!file.mimetype.includes('file')) {
+        //   return callback(new BadRequestException('Provide a valid image'), false);
+        // }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 5242880,
+      },
+    }),
+  )
+  async addMaterials(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Please upload a file');
+    return this.lectionService.addMaterials(Number(id), {
+      path: file.path,
+      filename: file.originalname,
+      mimetype: file.mimetype,
+    });
   }
 }

@@ -1,18 +1,12 @@
 import {
-  Action,
-  Command,
-  Ctx,
-  Hears,
   InjectBot,
   On,
   Start,
-  Update,
+  Update
 } from 'nestjs-telegraf';
-import { GetQueryData } from 'src/decorators/getQuery.decorator';
 import { UserService } from 'src/user/user.service';
-import { Context, Markup, Telegraf } from 'telegraf';
-import { studentButtons } from '../buttons/student.buttons';
-import { mainButtons } from '../buttons/main.buttons';
+import { Context, Telegraf } from 'telegraf';
+import { shareContactKeyboard } from '../keyboards/main/share-contact.keyboard';
 import { studentCommonKeyboard } from '../keyboards/student/student-common.keyboard';
 
 @Update()
@@ -28,12 +22,9 @@ export class BotMainUpdate {
       { command: 'start', description: 'Запуск бота' },
     ]);
 
-    await ctx.reply(
-      'Добро пожаловать!\n\nПоделитесь номером для работы бота',
-      Markup.keyboard([
-        [Markup.button.contactRequest(mainButtons.contact.label)],
-      ]),
-    );
+    await ctx.reply('Добро пожаловать!\n\nПоделитесь номером для работы бота', {
+      reply_markup: shareContactKeyboard().reply_markup,
+    });
   }
 
   @On('contact')

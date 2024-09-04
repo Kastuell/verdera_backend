@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CourseChapterService } from 'src/course_chapter/course_chapter.service';
+import { LocalFileDto } from 'src/local_file/dto/localFile.dto';
+import { LocalFileService } from 'src/local_file/local_file.service';
 import { PrismaService } from 'src/prisma.service';
 import translit from 'src/utils/generate-slug';
 import { LectionDto } from './dto/lection.dto';
@@ -10,7 +12,24 @@ export class LectionService {
   constructor(
     private prisma: PrismaService,
     private courseChapterService: CourseChapterService,
+    private readonly localFileService: LocalFileService,
   ) {}
+
+  async addMaterials(lectionId: number, dto: LocalFileDto) {
+    const material = await this.localFileService.saveLocalFileData(dto);
+    await this.prisma.lection.update({
+      where: {
+        id: lectionId,
+      },
+      data: {
+        materials: {
+          connect: {
+            id: material.id,
+          },
+        },
+      },
+    });
+  }
 
   async getAll() {
     const lection = await this.prisma.lection.findMany({
@@ -132,13 +151,12 @@ export class LectionService {
   }
 
   async create(dto: LectionDto) {
-    const { courseChapterId, materials, name, source } = dto;
+    const { courseChapterId, name, source } = dto;
 
     const lection = await this.prisma.lection.create({
       data: {
         name,
         slug: translit(name),
-        materials,
         source,
         courseChapter: {
           connect: {
@@ -152,7 +170,7 @@ export class LectionService {
   }
 
   async update(id: number, dto: LectionDto) {
-    const { courseChapterId, materials, name, source } = dto;
+    const { courseChapterId, name, source } = dto;
 
     const oldLection = this.getById(id);
 
@@ -166,7 +184,6 @@ export class LectionService {
       data: {
         name,
         slug: translit(name),
-        materials,
         source,
         courseChapter: {
           connect: {

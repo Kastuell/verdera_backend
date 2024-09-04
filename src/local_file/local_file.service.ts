@@ -38,4 +38,29 @@ export class LocalFileService {
     }
     return file;
   }
+
+  async getLectionFileById(fileId: number) {
+    const file = await this.prisma.localFile.findUnique({
+      where: {
+        id: fileId,
+      },
+      select: {
+        filename: true,
+        id: true,
+        mimetype: true,
+        path: true,
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+    if (!file) {
+      throw new NotFoundException();
+    }
+
+    
+    return file;
+  }
 }

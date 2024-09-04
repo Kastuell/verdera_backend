@@ -7,7 +7,7 @@ model Lection {
     slug   String @unique
     source String
 
-    materials String[]
+    materials LocalFile[]
 
     completeLection CompleteLections[]
 

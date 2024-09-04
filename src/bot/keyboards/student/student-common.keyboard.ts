@@ -9,5 +9,5 @@ export function studentCommonKeyboard() {
         studentButtons.lections.callback,
       ),
     ],
-  ]);
+  ]).oneTime();
 }
