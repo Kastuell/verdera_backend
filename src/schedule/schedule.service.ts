@@ -6,7 +6,6 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import 'moment/locale/ru';
-import { BotUpdate } from 'src/bot/bot.update';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { TimeDto } from './dto/schedule.dto';
@@ -15,13 +14,14 @@ import {
   returnTimeObject,
   returnWeekObject,
 } from './returnSchedule.objects';
+import { BotMainUpdate } from 'src/bot/updates/main.update';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
-    private botUpdate: BotUpdate,
+    private botUpdate: BotMainUpdate,
   ) {}
 
   // @Cron(CronExpression.EVERY_SECOND)

@@ -19,6 +19,7 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { SupportModule } from './support/support.module';
 import { UserModule } from './user/user.module';
 import { BotModule } from './bot/bot.module';
+import { sessionMiddleware } from './bot/middleware/session.middleware';
 
 @Module({
   imports: [
@@ -29,7 +30,9 @@ import { BotModule } from './bot/bot.module';
       }),
     }),
     TelegrafModule.forRoot({
-      token: process.env.TG_TOKEN
+      token: process.env.TG_TOKEN,
+
+      middlewares: [sessionMiddleware],
     }),
     schedule.forRoot(),
     AuthModule,

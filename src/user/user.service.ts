@@ -22,10 +22,10 @@ export class UserService {
     private readonly localFileService: LocalFileService,
   ) {}
 
-  async getByChatId(chatId: string) {
+  async getByChatId(chatId: string | number) {
     const user = await this.prisma.user.findMany({
       where: {
-        tg_id: chatId,
+        tg_id: chatId.toString(),
       },
       select: {
         ...returnUserObject,
