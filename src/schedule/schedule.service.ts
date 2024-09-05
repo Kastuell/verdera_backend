@@ -6,6 +6,7 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import 'moment/locale/ru';
+import { BotMainUpdate } from 'src/bot/updates/main.update';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { TimeDto } from './dto/schedule.dto';
@@ -14,7 +15,6 @@ import {
   returnTimeObject,
   returnWeekObject,
 } from './returnSchedule.objects';
-import { BotMainUpdate } from 'src/bot/updates/main.update';
 
 @Injectable()
 export class ScheduleService {
@@ -251,8 +251,8 @@ export class ScheduleService {
     const nextWeek = await this.getNextWeek(currentWeek.id);
 
     return {
-      currentWeek,
       nextWeek,
+      currentWeek,
     };
   }
 
