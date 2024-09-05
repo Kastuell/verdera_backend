@@ -13,10 +13,14 @@ import { CourseChapterService } from 'src/course_chapter/course_chapter.service'
 import { LectionService } from 'src/lection/lection.service';
 import { LocalFileService } from 'src/local_file/local_file.service';
 import { UserService } from 'src/user/user.service';
-import { Context, Telegraf } from 'telegraf';
+import { Context, Input, Telegraf } from 'telegraf';
 import { CallbackQuery, Update } from 'telegraf/typings/core/types/typegram';
 import { WizardContext } from 'telegraf/typings/scenes';
-import { GET_LECTIONS } from '../scenes.constants';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import { studentCommonKeyboard } from 'src/bot/keyboards/student/student-common.keyboard';
+import { GET_LECTIONS } from 'src/bot/constants/scenes.constants';
+import { WELCOME } from 'src/bot/constants/main.constants';
 
 @Wizard(GET_LECTIONS)
 export class GetLectionScene {
@@ -25,7 +29,7 @@ export class GetLectionScene {
     private readonly userService: UserService,
     private readonly courseChapterService: CourseChapterService,
     private readonly lectionService: LectionService,
-    private readonly localFileService: LocalFileService
+    private readonly localFileService: LocalFileService,
   ) {}
 
   @WizardStep(1)
@@ -81,8 +85,6 @@ export class GetLectionScene {
     @Ctx() ctx: WizardContext,
     @Ctx()
     callBack: Context<Update.CallbackQueryUpdate<CallbackQuery.DataQuery>>,
-    @Res({ passthrough: true }) response: Response,
-
   ) {
     try {
       const user = await this.userService.getByChatId(callBack.from.id);
@@ -90,16 +92,37 @@ export class GetLectionScene {
         callBack.callbackQuery.data.slice(8),
         user.id,
       );
-      // const qwe = await this.localFileService.getLectionFileById()
-      
+      lection.materials.forEach((item) => {
+        const stream = createReadStream(join(process.cwd(), item.path));
+        ctx.replyWithDocument(
+          Input.fromReadableStream(stream, `${lection.name}.docx`),
+        );
+      });
+
+      // ctx.replyWithDocument(
+      //   Input.fromURLStream(
+      //     `http://${process.env.DOMAIN}:${process.env.PORT}/api/local-file/lection/2`, "qe.docx"
+      //   ),
+      // );
     } catch (e) {
       console.log(e);
     }
   }
 
+  @Action('leave_scene')
+  async LeaveScene(@Ctx() ctx: WizardContext) {
+    await ctx.scene.leave();
+    const user = await this.userService.getByChatId(ctx.from.id);
+    await ctx.reply(WELCOME(user.name), {
+      reply_markup: studentCommonKeyboard().reply_markup,
+    });
+    return;
+  }
+
   @Hears('/start')
   async onSceneLeave(@Ctx() ctx: WizardContext) {
     await ctx.scene.leave();
+
     return;
   }
 }

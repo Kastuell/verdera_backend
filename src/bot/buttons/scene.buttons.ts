@@ -1,6 +1,11 @@
 export const sceneButtons = {
-  scene: {
-    label: 'Назад',
+  leave: {
+    label: 'Выйти',
     callback: 'leave_scene',
+  },
+
+  back: {
+    label: 'Назад',
+    callback: 'back_scene',
   },
 };

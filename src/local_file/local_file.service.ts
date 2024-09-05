@@ -49,7 +49,7 @@ export class LocalFileService {
         id: true,
         mimetype: true,
         path: true,
-        user: {
+        lection: {
           select: {
             id: true,
           },
@@ -60,7 +60,6 @@ export class LocalFileService {
       throw new NotFoundException();
     }
 
-    
     return file;
   }
 }

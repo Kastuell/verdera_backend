@@ -11,8 +11,8 @@ export function selectCourseKeyboard(
       )
       .concat(
         Markup.button.callback(
-          sceneButtons.scene.label,
-          sceneButtons.scene.callback,
+          sceneButtons.leave.label,
+          sceneButtons.leave.callback,
         ),
       ),
     {

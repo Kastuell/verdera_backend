@@ -1,13 +1,11 @@
-import {
-  InjectBot,
-  On,
-  Start,
-  Update
-} from 'nestjs-telegraf';
+import { Ctx, InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { UserService } from 'src/user/user.service';
 import { Context, Telegraf } from 'telegraf';
 import { shareContactKeyboard } from '../keyboards/main/share-contact.keyboard';
 import { studentCommonKeyboard } from '../keyboards/student/student-common.keyboard';
+import { BotContext } from '../bot.context';
+import { GET_LECTIONS } from '../constants/scenes.constants';
+import { ADDED_IN_DB, NOT_STUDENT, OUT_IN_DB, SHARE_CONTACT, WELCOME } from '../constants/main.constants';
 
 @Update()
 export class BotMainUpdate {
@@ -17,42 +15,39 @@ export class BotMainUpdate {
   ) {}
 
   @Start()
-  async startBot(ctx: Context) {
+  async startBot(@Ctx() ctx: BotContext) {
     this.bot.telegram.setMyCommands([
       { command: 'start', description: 'Запуск бота' },
     ]);
 
-    await ctx.reply('Добро пожаловать!\n\nПоделитесь номером для работы бота', {
+    await ctx.reply(SHARE_CONTACT, {
       reply_markup: shareContactKeyboard().reply_markup,
     });
+    return;
   }
 
   @On('contact')
   async contact(ctx: Context) {
-    const user = await this.userService.getByPhoneNumber(
-      // @ts-ignore
-      ctx.message.contact.phone_number,
-    );
+    // @ts-ignore
+    let phone_number = ctx.message.contact.phone_number;
+
+    if (phone_number[0] !== '+') phone_number = '+' + phone_number;
+    const user = await this.userService.getByPhoneNumber(phone_number);
 
     if (!user) {
-      await ctx.reply(
-        'Вас нет в базе данных Verdera, сначала зарегистрируйтесь на verdera.ru',
-      );
+      await ctx.reply(OUT_IN_DB);
       return;
     } else {
       if (user.role == 'USER') {
-        await ctx.reply('Вы не являетесь студентом Verdera');
+        await ctx.reply(NOT_STUDENT);
         return;
       } else {
         if (user.tg_id) {
           switch (user.role) {
             case 'ADMIN':
-              await ctx.reply(
-                `Добро пожаловать ${user.name}!\n\nЧто вы хотите?`,
-                {
-                  reply_markup: studentCommonKeyboard().reply_markup,
-                },
-              );
+              await ctx.reply(WELCOME(user.name), {
+                reply_markup: studentCommonKeyboard().reply_markup,
+              });
               return;
             case 'STUDENT':
               await ctx.reply(`${user.id}`);
@@ -66,7 +61,7 @@ export class BotMainUpdate {
             ctx.message.chat.id.toString(),
             user.id,
           );
-          ctx.reply('Ваш tg id успешно добавлен в базу данных!');
+          ctx.reply(ADDED_IN_DB);
         }
       }
     }

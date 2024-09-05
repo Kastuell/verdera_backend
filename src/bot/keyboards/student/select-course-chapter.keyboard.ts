@@ -9,7 +9,7 @@ export function selectCourseChapterKeyboard(
     lection: {
       id: number;
       name: string;
-      slug: string
+      slug: string;
     };
   }[],
 ) {
@@ -25,8 +25,8 @@ export function selectCourseChapterKeyboard(
       })
       .concat(
         Markup.button.callback(
-          sceneButtons.scene.label,
-          sceneButtons.scene.callback,
+          sceneButtons.leave.label,
+          sceneButtons.leave.callback,
         ),
       ),
     {
