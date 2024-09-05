@@ -1,11 +1,15 @@
 import { Ctx, InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { UserService } from 'src/user/user.service';
 import { Context, Telegraf } from 'telegraf';
+import { BotContext } from '../bot.context';
+import {
+  NOT_STUDENT,
+  OUT_IN_DB,
+  SHARE_CONTACT,
+  WELCOME
+} from '../constants/main.constants';
 import { shareContactKeyboard } from '../keyboards/main/share-contact.keyboard';
 import { studentCommonKeyboard } from '../keyboards/student/student-common.keyboard';
-import { BotContext } from '../bot.context';
-import { GET_LECTIONS } from '../constants/scenes.constants';
-import { ADDED_IN_DB, NOT_STUDENT, OUT_IN_DB, SHARE_CONTACT, WELCOME } from '../constants/main.constants';
 
 @Update()
 export class BotMainUpdate {
@@ -42,26 +46,24 @@ export class BotMainUpdate {
         await ctx.reply(NOT_STUDENT);
         return;
       } else {
-        if (user.tg_id) {
-          switch (user.role) {
-            case 'ADMIN':
-              await ctx.reply(WELCOME(user.name), {
-                reply_markup: studentCommonKeyboard().reply_markup,
-              });
-              return;
-            case 'STUDENT':
-              await ctx.reply(`${user.id}`);
-              return;
-            case 'TEACHER':
-              await ctx.reply('TEACHER');
-              return;
-          }
-        } else {
-          await this.userService.addTgId(
-            ctx.message.chat.id.toString(),
-            user.id,
-          );
-          ctx.reply(ADDED_IN_DB);
+        const new_user = await this.userService.addTgId(
+          ctx.message.chat.id.toString(),
+          user.id,
+        );
+        switch (new_user.role) {
+          case 'ADMIN':
+            await ctx.reply(WELCOME(new_user.name), {
+              reply_markup: studentCommonKeyboard().reply_markup,
+            });
+            return;
+          case 'STUDENT':
+            await ctx.reply(WELCOME(new_user.name), {
+              reply_markup: studentCommonKeyboard().reply_markup,
+            });
+            return;
+          case 'TEACHER':
+            await ctx.reply('TEACHER');
+            return;
         }
       }
     }
@@ -73,12 +75,12 @@ export class BotMainUpdate {
     );
   }
 }
-// политика конфидент
-// видос айфон
+// политика конфидент DONE
+// видос айфон DONE 
 // FAQ форма DONE
 // расписание адаптив DONE
 // подробнее о товаре зелёные квадратики DONE
-// стрелочка наверх
+// стрелочка наверх DONE
 // убрать ватсап DONE
 // заказы DONE
 // шапка каталога DONE

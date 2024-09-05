@@ -1,11 +1,10 @@
-import { Action, Ctx, Hears, InjectBot, Update } from 'nestjs-telegraf';
+import { Action, Ctx, InjectBot, Update } from 'nestjs-telegraf';
 import { UserService } from 'src/user/user.service';
 import { Telegraf } from 'telegraf';
 import { BotContext } from '../bot.context';
 import { studentButtons } from '../buttons/student.buttons';
-import { GET_LECTIONS } from '../constants/scenes.constants';
 import { NOT_STUDENT, OUT_IN_DB } from '../constants/main.constants';
-import { WizardContext } from 'telegraf/typings/scenes';
+import { GET_LECTIONS } from '../constants/scenes.constants';
 
 @Update()
 export class BotStudentUpdate {
@@ -16,8 +15,7 @@ export class BotStudentUpdate {
 
   @Action(studentButtons.lections.callback)
   async lections(@Ctx() ctx: BotContext) {
-      // @ts-ignore
-    console.log(ctx.update.callback_query)
+    
     const user = await this.userService.getByChatId(
       // @ts-ignore
       ctx.update.callback_query.from.id,

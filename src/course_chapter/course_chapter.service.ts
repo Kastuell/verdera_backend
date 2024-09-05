@@ -242,7 +242,7 @@ export class CourseChapterService {
         id: 'asc',
       },
     });
-
+    
     const completeCourseChaptersIds = (
       await this.findCompleteCourseChapters(userId, courseChapters[0].courseId)
     ).map((Item) => Item.courseChapterId);

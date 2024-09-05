@@ -1,4 +1,4 @@
-import { Res } from '@nestjs/common';
+import { createReadStream } from 'fs';
 import {
   Action,
   Ctx,
@@ -7,8 +7,12 @@ import {
   Wizard,
   WizardStep,
 } from 'nestjs-telegraf';
+import { join } from 'path';
+import { WELCOME } from 'src/bot/constants/main.constants';
+import { GET_LECTIONS } from 'src/bot/constants/scenes.constants';
 import { selectCourseChapterKeyboard } from 'src/bot/keyboards/student/select-course-chapter.keyboard';
 import { selectCourseKeyboard } from 'src/bot/keyboards/student/select-course.keyboard';
+import { studentCommonKeyboard } from 'src/bot/keyboards/student/student-common.keyboard';
 import { CourseChapterService } from 'src/course_chapter/course_chapter.service';
 import { LectionService } from 'src/lection/lection.service';
 import { LocalFileService } from 'src/local_file/local_file.service';
@@ -16,11 +20,6 @@ import { UserService } from 'src/user/user.service';
 import { Context, Input, Telegraf } from 'telegraf';
 import { CallbackQuery, Update } from 'telegraf/typings/core/types/typegram';
 import { WizardContext } from 'telegraf/typings/scenes';
-import { createReadStream } from 'fs';
-import { join } from 'path';
-import { studentCommonKeyboard } from 'src/bot/keyboards/student/student-common.keyboard';
-import { GET_LECTIONS } from 'src/bot/constants/scenes.constants';
-import { WELCOME } from 'src/bot/constants/main.constants';
 
 @Wizard(GET_LECTIONS)
 export class GetLectionScene {
@@ -65,6 +64,7 @@ export class GetLectionScene {
         callBack.callbackQuery.data.slice(6),
         user.id,
       );
+
       if (courseChapters.length == 0) {
       } else {
         await ctx.reply('К какой главе вы хотите получить лекцию?', {

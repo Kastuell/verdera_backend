@@ -13,22 +13,16 @@ export function selectCourseChapterKeyboard(
     };
   }[],
 ) {
+  const temp = courseChapters
+    .filter((item) => item.unlocked)
+    .map((i) => Markup.button.callback(i.name, `Лекция: ${i.lection.slug}`));
   return Markup.inlineKeyboard(
-    courseChapters
-      .map((item) => {
-        if (item.unlocked) {
-          return Markup.button.callback(
-            item.name,
-            `Лекция: ${item.lection.slug}`,
-          );
-        }
-      })
-      .concat(
-        Markup.button.callback(
-          sceneButtons.leave.label,
-          sceneButtons.leave.callback,
-        ),
+    temp.concat(
+      Markup.button.callback(
+        sceneButtons.leave.label,
+        sceneButtons.leave.callback,
       ),
+    ),
     {
       columns: 1,
     },
