@@ -95,7 +95,8 @@ export class GetLectionScene {
       lection.materials.forEach((item) => {
         const stream = createReadStream(join(process.cwd(), item.path));
         ctx.replyWithDocument(
-          Input.fromReadableStream(stream, `${lection.name}.docx`),
+          // Input.fromReadableStream(stream, `${lection.name}.docx`),
+          Input.fromReadableStream(stream, item.filename),
         );
       });
 
