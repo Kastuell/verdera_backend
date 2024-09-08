@@ -11,6 +11,5 @@ model LocalFile {
 
     user User?
 
-    lection   Lection? @relation(fields: [lectionId], references: [id])
-    lectionId Int?     @unique
+    lection   Lection[]
 }

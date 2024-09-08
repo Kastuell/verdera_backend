@@ -20,6 +20,7 @@ import { SupportModule } from './support/support.module';
 import { UserModule } from './user/user.module';
 import { BotModule } from './bot/bot.module';
 import { sessionMiddleware } from './bot/middleware/session.middleware';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { sessionMiddleware } from './bot/middleware/session.middleware';
     SupportModule,
     ScheduleModule,
     BotModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [],

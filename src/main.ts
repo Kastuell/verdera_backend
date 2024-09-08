@@ -1,13 +1,16 @@
 import { NestFactory } from '@nestjs/core';
+import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma.service';
+
 async function bootstrap() {
   const PORT = process.env.PORT || 7000;
 
   const app = await NestFactory.create(AppModule);
 
-  
+  app.use(bodyParser.urlencoded({ limit: '1gb', extended: true }));
+  app.use(bodyParser.json({ limit: '1gb' }));
 
   app.setGlobalPrefix('api');
   app.getHttpAdapter().getInstance().disable('x-powered-by');

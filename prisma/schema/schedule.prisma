@@ -3,8 +3,8 @@ model ScheduleWeek {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    week_start_meta String
-    week_end_meta   String
+    week_start_meta String @unique
+    week_end_meta   String @unique
 
     week_start String
     week_end   String
@@ -38,13 +38,13 @@ model ScheduleTime {
 
     status ScheduleTimeEnum @default(FREE)
 
-    student   User? @relation(fields: [studentId], references: [id], "scheduleTimeStudent")
+    student   User? @relation(fields: [studentId], references: [id], "scheduleTimeStudent", onDelete: Cascade)
     studentId Int?
 
-    teacher   User? @relation(fields: [teacherId], references: [id], "scheduleTimeTeacher")
+    teacher   User? @relation(fields: [teacherId], references: [id], "scheduleTimeTeacher", onDelete: Cascade)
     teacherId Int?
 
-    sheduleDay    ScheduleDay? @relation(fields: [scheduleDayId], references: [id])
+    sheduleDay    ScheduleDay? @relation(fields: [scheduleDayId], references: [id], onDelete: Cascade)
     scheduleDayId Int?
 }
 

@@ -96,7 +96,7 @@ export class GetLectionScene {
         const stream = createReadStream(join(process.cwd(), item.path));
         ctx.replyWithDocument(
           // Input.fromReadableStream(stream, `${lection.name}.docx`),
-          Input.fromReadableStream(stream, item.filename),
+          Input.fromReadableStream(stream, item.filename)
         );
       });
 

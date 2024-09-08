@@ -1,14 +1,18 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EnumUserRoles } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import { Response } from 'express';
+import { EmailDto } from 'src/email/dto/send_email.dto';
+import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma.service';
 import { returnUserObject } from 'src/user/return-user.object';
+import { v4 as uuidv4 } from 'uuid';
 import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto';
 
 @Injectable()
@@ -21,6 +25,7 @@ export class AuthService {
   constructor(
     private jwt: JwtService,
     private prisma: PrismaService,
+    private emailService: EmailService,
   ) {}
 
   async login(dto: AuthLoginDto) {
@@ -31,6 +36,57 @@ export class AuthService {
       user,
       ...tokens,
     };
+  }
+
+  async getUserByEmail(email: string) {
+    if (email === undefined)
+      throw new BadRequestException('Предоставьте почту');
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+      select: {
+        ...returnUserObject,
+      },
+    });
+
+    if (!user) throw new NotFoundException('Пользователь не найден');
+
+    return user;
+  }
+
+  async emailConfirm(dto: EmailDto) {
+    const { code, to } = dto;
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: to,
+      },
+    });
+    if (!user) throw new NotFoundException();
+    else {
+      if (!user.isEmailConfirmed) {
+        if (code == user.confirmCode) {
+          const updated_user = await this.prisma.user.update({
+            where: {
+              email: to,
+            },
+            data: {
+              isEmailConfirmed: true,
+            },
+          });
+
+          const tokens = this.issueTokens(user.id);
+          return {
+            user,
+            ...tokens,
+          };
+        } else {
+          throw new BadRequestException('Коды не совпадают');
+        }
+      } else {
+        throw new BadRequestException('Почта уже активирована');
+      }
+    }
   }
 
   async register(dto: AuthRegisterDto) {
@@ -63,15 +119,21 @@ export class AuthService {
         password: await hash(password),
         role: EnumUserRoles.USER,
         active: true,
+        confirmCode: uuidv4(),
         ...rest,
       },
     });
 
-    const tokens = this.issueTokens(user.id);
+    await this.emailService.sendEmail({
+      to: 'sholotun@mail.ru',
+      code: user.confirmCode,
+    });
+
+    // const tokens = this.issueTokens(user.id);
 
     return {
       user,
-      ...tokens,
+      // ...tokens,
     };
   }
 

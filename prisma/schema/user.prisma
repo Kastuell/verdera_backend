@@ -13,6 +13,9 @@ model User {
     region   String
     birthday String
 
+    isEmailConfirmed Boolean @default(false)
+    confirmCode      String     @default("")
+
     tg_id String?
 
     active Boolean

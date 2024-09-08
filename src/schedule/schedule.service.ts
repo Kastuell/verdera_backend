@@ -29,6 +29,31 @@ export class ScheduleService {
   //   console.log("qwe")
   // }
 
+  async getCloserWeekDayByDate(date: string) {
+    const week = await this.prisma.scheduleWeek.findFirst();
+
+    const day = await this.prisma.scheduleDay.findUnique({
+      where: {
+        date: date,
+      },
+      select: {
+        ...returnDayObject,
+      },
+    });
+    if (day) return day;
+    else if (!day) {
+      const new_day = await this.prisma.scheduleDay.findUnique({
+        where: {
+          date: week.week_start_meta,
+        },
+        select: {
+          ...returnDayObject,
+        },
+      });
+      return new_day;
+    }
+  }
+
   async getAllDays() {
     const days = await this.prisma.scheduleDay.findMany({
       select: {
@@ -213,7 +238,14 @@ export class ScheduleService {
     });
 
     if (!day) {
-      const week = await this.prisma.scheduleWeek.findFirst({
+      const new_day = await this.getCloserWeekDayByDate(date);
+      if (!new_day) {
+        throw new NotFoundException('Такого дня нет new_day');
+      }
+      const week = await this.prisma.scheduleWeek.findUnique({
+        where: {
+          week_start_meta: new_day.date,
+        },
         select: {
           ...returnWeekObject,
         },
@@ -353,7 +385,7 @@ export class ScheduleService {
     });
 
     await this.botUpdate.notificate(
-      [867176416,461422689],
+      [867176416, 461422689],
       `Студент: ${family} ${name} ${surname} ⏳\n\nC почтой: ${email}\n\nC телефоном: ${phone}\n\nЗаписался на ${moment(selectedTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${selectedTime.time}`,
     );
 
@@ -416,7 +448,7 @@ export class ScheduleService {
     });
 
     await this.botUpdate.notificate(
-      [867176416,461422689],
+      [867176416, 461422689],
       `Вы: ${family} ${name} ${surname} ✅\n\nПодтвердили запись студента: ${approvedTime.student.family} ${approvedTime.student.name} ${approvedTime.student.surname} на ${moment(approvedTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${approvedTime.time}`,
     );
 
@@ -478,7 +510,7 @@ export class ScheduleService {
       });
 
       await this.botUpdate.notificate(
-        [867176416,461422689],
+        [867176416, 461422689],
         `Студент: ${family} ${name} ${surname} ❌\n\nC почтой: ${email}\n\nC телефоном: ${phone}\n\nОтменил запись на ${moment(canceledTime.sheduleDay.date).format('DD.MM.YYYY')}, по времени: ${canceledTime.time}`,
       );
 

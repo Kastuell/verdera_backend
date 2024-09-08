@@ -81,9 +81,6 @@ export class LectionController {
         // }
         callback(null, true);
       },
-      limits: {
-        fileSize: 5242880,
-      },
     }),
   )
   async addMaterials(
@@ -93,7 +90,7 @@ export class LectionController {
     if (!file) throw new BadRequestException('Please upload a file');
     return this.lectionService.addMaterials(Number(id), {
       path: file.path,
-      filename: file.originalname,
+      filename: Buffer.from(file.originalname, 'latin1').toString('utf-8'),
       mimetype: file.mimetype,
     });
   }

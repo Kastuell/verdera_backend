@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
+  Param,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -28,9 +31,16 @@ export class AuthController {
   ) {
     const { refreshToken, accessToken, ...response } =
       await this.authService.login(dto);
-    this.authService.addTokensToResponse(res, refreshToken, accessToken);
+    const user = await this.authService.getUserByEmail(response.user.email);
 
-    return response;
+    if (user.isEmailConfirmed) {
+      this.authService.addTokensToResponse(res, refreshToken, accessToken);
+
+      return response;
+    } else
+      throw new BadRequestException(
+        'Ваша учётная запись неактивирована, откройте почту для подтверждения',
+      );
   }
 
   @UsePipes(new ValidationPipe())
@@ -40,8 +50,24 @@ export class AuthController {
     @Body() dto: AuthRegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const { ...response } = await this.authService.register(dto);
+    // this.authService.addTokensToResponse(res, refreshToken, accessToken);
+
+    return response;
+  }
+
+  @Post('email-confirm/:email')
+  async emailConfirm(
+    @Param('email') email: string,
+    @Query()
+    query: {
+      code: string;
+    },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const code = query.code;
     const { refreshToken, accessToken, ...response } =
-      await this.authService.register(dto);
+      await this.authService.emailConfirm({ to: email, code });
     this.authService.addTokensToResponse(res, refreshToken, accessToken);
 
     return response;
