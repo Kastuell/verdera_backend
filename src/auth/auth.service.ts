@@ -13,7 +13,11 @@ import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma.service';
 import { returnUserObject } from 'src/user/return-user.object';
 import { v4 as uuidv4 } from 'uuid';
-import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto';
+import {
+  AuthLoginDto,
+  AuthRegisterDto,
+  ChangePasswordDto,
+} from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +35,12 @@ export class AuthService {
   async login(dto: AuthLoginDto) {
     const { password, ...user } = await this.validateUser(dto);
     const tokens = this.issueTokens(user.id);
+
+    if (!user.isEmailConfirmed) {
+      throw new BadRequestException(
+        'Ваша учётная запись неактивирована, откройте почту для подтверждения',
+      );
+    }
 
     return {
       user,
@@ -134,6 +144,40 @@ export class AuthService {
     return {
       user,
       // ...tokens,
+    };
+  }
+
+  async changePassword(
+    dto: ChangePasswordDto,
+    query: {
+      code: string;
+    },
+  ) {
+    const { email, password } = dto;
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (!user) throw new NotFoundException('Пользователя с такой почтой нет');
+    if (user.confirmCode !== query.code) {
+      throw new BadRequestException('Коды не совпадают');
+    }
+
+    const new_user = await this.prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        password: await hash(password),
+      },
+    });
+
+    const tokens = this.issueTokens(user.id);
+
+    return {
+      new_user,
+      ...tokens,
     };
   }
 

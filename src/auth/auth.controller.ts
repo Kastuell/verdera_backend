@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -11,12 +10,16 @@ import {
   Res,
   UnauthorizedException,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Auth } from 'src/decorators/auth.decorator';
 import { AuthService } from './auth.service';
-import { AuthLoginDto, AuthRegisterDto } from './dto/auth.dto';
+import {
+  AuthLoginDto,
+  AuthRegisterDto,
+  ChangePasswordDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,14 +36,9 @@ export class AuthController {
       await this.authService.login(dto);
     const user = await this.authService.getUserByEmail(response.user.email);
 
-    if (user.isEmailConfirmed) {
-      this.authService.addTokensToResponse(res, refreshToken, accessToken);
+    this.authService.addTokensToResponse(res, refreshToken, accessToken);
 
-      return response;
-    } else
-      throw new BadRequestException(
-        'Ваша учётная запись неактивирована, откройте почту для подтверждения',
-      );
+    return response;
   }
 
   @UsePipes(new ValidationPipe())
@@ -52,6 +50,23 @@ export class AuthController {
   ) {
     const { ...response } = await this.authService.register(dto);
     // this.authService.addTokensToResponse(res, refreshToken, accessToken);
+
+    return response;
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Body() dto: ChangePasswordDto,
+    @Query()
+    query: {
+      code: string;
+    },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { refreshToken, accessToken, ...response } =
+      await this.authService.changePassword(dto, query);
+
+    this.authService.addTokensToResponse(res, refreshToken, accessToken);
 
     return response;
   }

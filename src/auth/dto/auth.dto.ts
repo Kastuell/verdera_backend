@@ -31,6 +31,18 @@ export class AuthRegisterDto extends AuthLoginDto {
     birthday: string
 }
 
+export class ChangePasswordDto {
+    @IsEmail()
+    email: string;
+  
+    @IsString()
+    password: string;
+  
+    @IsString()
+    confirmCode: string;
+  }
+  
+
 export type RoleT = 'USER' |
     'STUDENT' |
     'TEACHER' |

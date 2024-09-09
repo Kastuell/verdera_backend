@@ -9,7 +9,7 @@ import {
   UploadedFile,
   UseInterceptors,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
 import { CurrentUser } from 'src/decorators/user.decorator';
@@ -46,28 +46,35 @@ export class UserController {
 
   @Post('avatar')
   @Auth()
-  @UseInterceptors(LocalFilesInterceptor({
-    fieldName: 'file',
-    path: '/avatars',
-    fileFilter: (request, file, callback) => {
-      if (!file.mimetype.includes('image')) {
-        return callback(new BadRequestException('Provide a valid image'), false);
-      }
-      callback(null, true);
-    },
-    limits: {
-      fileSize: 5242880
-    }
-  }))
+  @UseInterceptors(
+    LocalFilesInterceptor({
+      fieldName: 'file',
+      path: '/avatars',
+      fileFilter: (request, file, callback) => {
+        if (!file.mimetype.includes('image')) {
+          return callback(
+            new BadRequestException('Provide a valid image'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 5242880,
+      },
+    }),
+  )
   async addAvatar(
     @CurrentUser('id') userId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!file) throw new BadRequestException('Please upload a file')
+    if (!file) throw new BadRequestException('Please upload a file');
     return this.userService.addAvatar(Number(userId), {
       path: file.path,
       filename: file.originalname,
       mimetype: file.mimetype,
     });
   }
+
+  
 }
