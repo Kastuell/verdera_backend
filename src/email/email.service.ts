@@ -12,7 +12,7 @@ export class EmailService {
 
     console.log(dto);
 
-    const link = `${process.env.EMAIL_CONFIRM_LINK}?email=${to}&code=${code}`;
+    const link = `${process.env.FRONT_URL}/email/confirm?email=${to}&code=${code}`;
 
     const url = process.env.RUSENDER_EMAIL;
     const data = {
@@ -65,7 +65,7 @@ export class EmailService {
       throw new BadRequestException('Нет кода подтверждения');
 
     const link = `${process.env.EMAIL_CONFIRM_LINK}?email=${email}&code=${user.confirmCode}`;
-  console.log(link)
+
     const url = process.env.RUSENDER_EMAIL;
     const data = {
       mail: {
@@ -99,5 +99,19 @@ export class EmailService {
       });
 
     return data;
+  }
+
+  async sendChangePassword(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) throw new BadRequestException('User not found');
+
+    const link = `${process.env.FRONT_URL}/email/change?code=${user.confirmCode}`;
+
+    const url = process.env.RUSENDER_EMAIL;
   }
 }
