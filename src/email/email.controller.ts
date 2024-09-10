@@ -13,6 +13,11 @@ export class EmailController {
 
   @Post('resend/:email')
   async resendConfirm(@Param('email') email: string) {
-    return this, this.emailService.resendConfirm(email);
+    return this.emailService.resendConfirm(email);
+  }
+
+  @Post('change-password/:email')
+  async sendResetPassword(@Param('email') email: string) {
+    return this.emailService.sendResetPassword(email);
   }
 }

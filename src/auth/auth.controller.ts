@@ -18,7 +18,7 @@ import { AuthService } from './auth.service';
 import {
   AuthLoginDto,
   AuthRegisterDto,
-  ChangePasswordDto,
+  ResetPasswordDto,
 } from './dto/auth.dto';
 
 @Controller('auth')
@@ -56,15 +56,16 @@ export class AuthController {
 
   @Post('change-password')
   async changePassword(
-    @Body() dto: ChangePasswordDto,
+    @Body() dto: ResetPasswordDto,
     @Query()
     query: {
       code: string;
+      email: string
     },
     @Res({ passthrough: true }) res: Response,
   ) {
     const { refreshToken, accessToken, ...response } =
-      await this.authService.changePassword(dto, query);
+      await this.authService.resetPassword(dto, query);
 
     this.authService.addTokensToResponse(res, refreshToken, accessToken);
 

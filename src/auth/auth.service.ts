@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   AuthLoginDto,
   AuthRegisterDto,
-  ChangePasswordDto,
+  ResetPasswordDto,
 } from './dto/auth.dto';
 
 @Injectable()
@@ -67,11 +67,7 @@ export class AuthService {
 
   async emailConfirm(dto: EmailDto) {
     const { code, to } = dto;
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: to,
-      },
-    });
+    const user = await this.getUserByEmail(to);
     if (!user) throw new NotFoundException();
     else {
       if (!user.isEmailConfirmed) {
@@ -147,26 +143,27 @@ export class AuthService {
     };
   }
 
-  async changePassword(
-    dto: ChangePasswordDto,
+  async resetPassword(
+    dto: ResetPasswordDto,
     query: {
       code: string;
+      email: string;
     },
   ) {
-    const { email, password } = dto;
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
+    
+    const { password } = dto;
+
+    const user = await this.getUserByEmail(query.email);
+
     if (!user) throw new NotFoundException('Пользователя с такой почтой нет');
+
     if (user.confirmCode !== query.code) {
       throw new BadRequestException('Коды не совпадают');
     }
 
     const new_user = await this.prisma.user.update({
       where: {
-        email: email,
+        email: query.email,
       },
       data: {
         password: await hash(password),

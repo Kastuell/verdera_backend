@@ -31,15 +31,9 @@ export class AuthRegisterDto extends AuthLoginDto {
     birthday: string
 }
 
-export class ChangePasswordDto {
-    @IsEmail()
-    email: string;
-  
+export class ResetPasswordDto {
     @IsString()
     password: string;
-  
-    @IsString()
-    confirmCode: string;
   }
   
 
