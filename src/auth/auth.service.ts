@@ -56,7 +56,9 @@ export class AuthService {
         email: email,
       },
       select: {
-        ...returnUserObject,
+        id: true,
+        isEmailConfirmed: true,
+        confirmCode: true
       },
     });
 
