@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
+import { CurrentUser } from 'src/decorators/user.decorator';
 import { DiscountService } from './discount.service';
 import { DiscountDto } from './dto/discount.dto';
 
@@ -20,7 +21,13 @@ export class DiscountController {
 
   @Get('/:email')
   @Auth('ADMIN')
-  async getByEmail(@Param('email') dto: DiscountDto) {
-    return await this.discountService.getByEmail(dto);
+  async getByEmail(@Param('email') email: string) {
+    return await this.discountService.getByEmail(email);
+  }
+
+  @Get('/get/my-discount')
+  @Auth()
+  async getMyDiscount(@CurrentUser('email') email: string) {
+    return await this.discountService.getMyDiscount(email);
   }
 }

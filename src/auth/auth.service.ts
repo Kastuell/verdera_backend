@@ -58,7 +58,7 @@ export class AuthService {
       select: {
         id: true,
         isEmailConfirmed: true,
-        confirmCode: true
+        confirmCode: true,
       },
     });
 
@@ -152,7 +152,6 @@ export class AuthService {
       email: string;
     },
   ) {
-    
     const { password } = dto;
 
     const user = await this.getUserByEmail(query.email);
@@ -242,7 +241,7 @@ export class AuthService {
 
     const isValid = await verify(user.password, dto.password);
 
-    if (!isValid) throw new UnauthorizedException('Invalid password');
+    if (!isValid) throw new UnauthorizedException('Неверный пароль!');
 
     return user;
   }

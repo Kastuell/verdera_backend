@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EnumOrderStatus } from '@prisma/client';
+import { DiscountService } from 'src/discount/discount.service';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import * as YooKassa from 'yookassa';
@@ -12,11 +13,14 @@ const yooKassa = new YooKassa({
   secretKey: process.env['PAYMENT_TOKEN'],
 });
 
+const DISCOUNT_PERCANTAGE = 10;
+
 @Injectable()
 export class OrderService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
+    private discountService: DiscountService,
   ) {}
 
   async placeOrder(dto: OrderDto, userId: number) {
@@ -24,6 +28,14 @@ export class OrderService {
       (prev, cur) => prev + cur.price * cur.quantity,
       0,
     );
+
+    const { email } = await this.userService.getById(userId);
+
+    const discount = await this.discountService.getByEmail(email);
+
+    const total_disc = discount
+      ? total * (1 - DISCOUNT_PERCANTAGE / 100)
+      : total;
 
     const order = await this.prisma.order.create({
       data: {
@@ -37,13 +49,13 @@ export class OrderService {
           },
         },
         info: dto.info,
-        total: total,
+        total: total_disc,
       },
     });
 
     const payment = await yooKassa.createPayment({
       amount: {
-        value: total.toFixed(2),
+        value: total_disc.toFixed(2),
         currency: 'RUB',
       },
       payment_method_data: {
