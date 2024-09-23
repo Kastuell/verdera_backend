@@ -5,7 +5,7 @@ model Product {
 
     name      String  @unique
     slug      String  @unique
-    subName   String  @map("sub_name")
+    subName   String?  @map("sub_name")
     img       String
     price     Int
     stock     Boolean

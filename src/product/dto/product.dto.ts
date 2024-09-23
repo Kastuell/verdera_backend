@@ -19,7 +19,6 @@ export class ProductDto implements Prisma.ProductUpdateInput {
     stock: boolean
 
     @IsObject()
-    @IsOptional()
     description: DescriptionT
 
     @IsNumber()
