@@ -3,12 +3,13 @@ model Product {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    name      String  @unique
-    slug      String  @unique
-    subName   String?  @map("sub_name")
-    img       String
-    price     Int
-    stock     Boolean
+    name        String  @unique
+    slug        String  @unique
+    subName     String? @map("sub_name")
+    potent      String?
+    img         String
+    price       Int
+    stock       Boolean
     description Json
 
     category   Category? @relation(fields: [categoryId], references: [id])

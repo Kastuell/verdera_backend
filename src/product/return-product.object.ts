@@ -9,4 +9,5 @@ export const returnProductObject: Prisma.ProductSelect = {
   price: true,
   category: true,
   description: true,
+  potent: true,
 };
