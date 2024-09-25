@@ -40,8 +40,6 @@ export class DiscountService {
       },
     });
 
-    if (!discount) throw new NotFoundException('Скидка не найдена');
-
     return discount;
   }
 
