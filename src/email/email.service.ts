@@ -23,7 +23,7 @@ export class EmailService {
     const data = {
       mail: {
         to: {
-          email: 'verdera@internet.ru',
+          email: `${process.env.SUPPORT_EMAIL}`,
           name: 'string',
         },
         from: {
