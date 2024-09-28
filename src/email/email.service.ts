@@ -4,10 +4,56 @@ import { PrismaService } from 'src/prisma.service';
 import { EmailDto } from './dto/send_email.dto';
 import { ConfirmingLinkTemplate } from './templates/ConfirmingLinkTemplate';
 import { resetPasswordTemplate } from './templates/resetPasswordTemplate';
+import { SupportTemplate } from './templates/SupportTemplate';
 
 @Injectable()
 export class EmailService {
   constructor(private prisma: PrismaService) {}
+
+  async sendSupportEmail(support: {
+    id?: number;
+    createdAt?: Date;
+    name?: string;
+    phone?: string;
+    messenger?: string;
+    description?: string;
+    userId?: number | null;
+  }) {
+    const url = process.env.RUSENDER_EMAIL;
+    const data = {
+      mail: {
+        to: {
+          email: 'verdera@internet.ru',
+          name: 'string',
+        },
+        from: {
+          email: 'no-reply@verdera.ru',
+          name: 'Verdera',
+        },
+        subject: `Обращение в поддержку №${support.id}`,
+        previewTitle: `Обращение в поддержку №${support.id}`,
+        html: SupportTemplate({ support }),
+      },
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Api-Key': process.env.RUSENDER_KEY,
+    };
+    axios
+      .post(url, data, { headers })
+      .then((response) => {
+        // console.log(response);
+        // Обработка ответа API
+      })
+      .catch((error) => {
+        // Обработка ошибки
+        console.log(error);
+      });
+
+    return data;
+  }
+
   async sendEmail(dto: EmailDto) {
     const { to, code } = dto;
 

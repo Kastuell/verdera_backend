@@ -1,9 +1,9 @@
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsString } from 'class-validator';
 
 export class EmailDto {
-    @IsEmail()
-    to: string;
+  @IsEmail()
+  to: string;
 
-    @IsString()
-    code: string
-  }
+  @IsString()
+  code: string;
+}

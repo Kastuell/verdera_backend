@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { SupportDto, SupportDtoUnAuth } from './dto/support.dto';
@@ -8,6 +9,7 @@ export class SupportService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
+    private emailService: EmailService,
   ) {}
 
   async getAll() {
@@ -30,6 +32,8 @@ export class SupportService {
       },
     });
 
+    await this.emailService.sendSupportEmail(support);
+
     return support;
   }
 
@@ -39,6 +43,8 @@ export class SupportService {
         ...dto,
       },
     });
+    
+    await this.emailService.sendSupportEmail(support);
 
     return support;
   }
