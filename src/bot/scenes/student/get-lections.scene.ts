@@ -95,6 +95,7 @@ export class GetLectionScene {
       await ctx.reply('Процесс получения материалов к лекции может занять какое-то время')
       lection.materials.forEach((item) => {
         console.log(item.path)
+        console.log(process.cwd())
         const stream = createReadStream(join(process.cwd(), item.path));
         ctx.replyWithDocument(
           // Input.fromReadableStream(stream, `${lection.name}.docx`),
