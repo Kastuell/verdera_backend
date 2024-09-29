@@ -22,7 +22,7 @@ import {
 @Injectable()
 export class AuthService {
   EXPIRE_DAYS_REFRESH_TOKEN = 30;
-  EXPIRE_HOURS_ACCESS_TOKEN = 24;
+  EXPIRE_HOURS_ACCESS_TOKEN = 24 * 7;
   REFRESH_TOKEN_NAME = 'refreshToken';
   ACCESS_TOKEN_NAME = 'accessToken';
 

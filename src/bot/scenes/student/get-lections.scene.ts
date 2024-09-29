@@ -92,7 +92,9 @@ export class GetLectionScene {
         callBack.callbackQuery.data.slice(8),
         user.id,
       );
+      await ctx.reply('Процесс получения материалов к лекции может занять какое-то время')
       lection.materials.forEach((item) => {
+        console.log(item.path)
         const stream = createReadStream(join(process.cwd(), item.path));
         ctx.replyWithDocument(
           // Input.fromReadableStream(stream, `${lection.name}.docx`),
