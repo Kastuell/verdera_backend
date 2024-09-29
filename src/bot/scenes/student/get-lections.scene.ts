@@ -92,14 +92,18 @@ export class GetLectionScene {
         callBack.callbackQuery.data.slice(8),
         user.id,
       );
-      await ctx.reply('Процесс получения материалов к лекции может занять какое-то время')
+      await ctx.reply(
+        'Процесс получения материалов к лекции может занять какое-то время',
+      );
       lection.materials.forEach((item) => {
-        console.log(item.path)
-        console.log(process.cwd())
-        const stream = createReadStream(join(process.cwd(), item.path));
+        const stream = createReadStream(
+          process.platform == 'win32'
+            ? join(process.cwd(), item.path)
+            : join(process.cwd(), item.path.split('\\').join('/')),
+        );
         ctx.replyWithDocument(
           // Input.fromReadableStream(stream, `${lection.name}.docx`),
-          Input.fromReadableStream(stream, item.filename)
+          Input.fromReadableStream(stream, item.filename),
         );
       });
 
