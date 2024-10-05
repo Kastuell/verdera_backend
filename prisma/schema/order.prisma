@@ -36,4 +36,5 @@ enum EnumOrderStatus {
     PAYED
     SHIPPED
     DELIVERED
+    CANCELED
 }

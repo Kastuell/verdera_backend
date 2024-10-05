@@ -89,6 +89,19 @@ export class OrderService {
       const payment = await yooKassa.capturePayment(dto.object.id);
       return payment;
     }
+    if (dto.event == 'payment.canceled') {
+      const orderId = Number(dto.object.description.split('#')[1]);
+
+      const order = await this.prisma.order.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          status: EnumOrderStatus.CANCELED,
+        },
+      });
+      return order;
+    }
 
     if (dto.event == 'payment.succeeded') {
       const orderId = Number(dto.object.description.split('#')[1]);

@@ -24,4 +24,5 @@ export const returnOrdersObject: Prisma.OrderSelect = {
   total: true,
   status: true,
   userId: true,
+  createdAt: true,
 };
