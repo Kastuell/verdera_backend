@@ -6,7 +6,7 @@ import {
   NOT_STUDENT,
   OUT_IN_DB,
   SHARE_CONTACT,
-  WELCOME
+  WELCOME,
 } from '../constants/main.constants';
 import { shareContactKeyboard } from '../keyboards/main/share-contact.keyboard';
 import { studentCommonKeyboard } from '../keyboards/student/student-common.keyboard';
@@ -70,13 +70,17 @@ export class BotMainUpdate {
   }
 
   async notificate(userTgId: number[], message: string) {
-    userTgId.map(
-      async (item) => await this.bot.telegram.sendMessage(item, message),
-    );
+    userTgId.map(async (item) => {
+      try {
+        await this.bot.telegram.sendMessage(item, message);
+      } catch (e) {
+        console.log(e);
+      }
+    });
   }
 }
 // политика конфидент DONE
-// видос айфон DONE 
+// видос айфон DONE
 // FAQ форма DONE
 // расписание адаптив DONE
 // подробнее о товаре зелёные квадратики DONE

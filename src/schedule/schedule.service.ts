@@ -343,6 +343,7 @@ export class ScheduleService {
       name,
       family,
       surname,
+      role,
     } = await this.userService.getById(studentId);
 
     const scheduleTimeStudent = wqe ?? [];
@@ -351,7 +352,7 @@ export class ScheduleService {
       (item) => item.status == 'PENDING' || item.status == 'SELECTED',
     );
 
-    if (alreadySelected.length == 3)
+    if (alreadySelected.length == 3 && role !== 'ADMIN')
       throw new BadRequestException(
         'Вы не можете выбрать более трёх занятий одновременно',
       );
@@ -381,7 +382,7 @@ export class ScheduleService {
           },
         },
         time: true,
-        teacherId: true
+        teacherId: true,
       },
     });
 
@@ -445,7 +446,7 @@ export class ScheduleService {
             surname: true,
           },
         },
-        teacherId: true
+        teacherId: true,
       },
     });
 
@@ -508,7 +509,7 @@ export class ScheduleService {
             },
           },
           time: true,
-          teacherId: true
+          teacherId: true,
         },
       });
 
