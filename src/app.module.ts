@@ -21,6 +21,7 @@ import { UserModule } from './user/user.module';
 import { BotModule } from './bot/bot.module';
 import { sessionMiddleware } from './bot/middleware/session.middleware';
 import { EmailModule } from './email/email.module';
+import { PromoModule } from './promo/promo.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EmailModule } from './email/email.module';
     ScheduleModule,
     BotModule,
     EmailModule,
+    PromoModule,
   ],
   controllers: [],
   providers: [],

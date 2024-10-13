@@ -1,11 +1,5 @@
 import { EnumOrderStatus } from '@prisma/client';
-import {
-    ArrayMinSize,
-    IsEnum,
-    IsNumber,
-    IsObject,
-    IsOptional
-} from 'class-validator';
+import { ArrayMinSize, IsEnum, IsNumber, IsOptional } from 'class-validator';
 
 export class OrderDto {
   @IsOptional()
@@ -15,9 +9,15 @@ export class OrderDto {
   @ArrayMinSize(1)
   items: OrderItemDto[];
 
-  @IsObject()
-  info: object;
-
+  info: {
+    city: string;
+    delivery: string;
+    email: string;
+    family: string;
+    name: string;
+    phone: string;
+    promo: string;
+  };
 }
 
 export class OrderItemDto {

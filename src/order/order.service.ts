@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EnumOrderStatus } from '@prisma/client';
 import { DiscountService } from 'src/discount/discount.service';
 import { PrismaService } from 'src/prisma.service';
+import { PromoService } from 'src/promo/promo.service';
 import { UserService } from 'src/user/user.service';
 import * as YooKassa from 'yookassa';
 import { OrderDto } from './dto/order.dto';
@@ -14,6 +15,7 @@ const yooKassa = new YooKassa({
 });
 
 const DISCOUNT_PERCANTAGE = 10;
+const PROMO_PERCANTAGE = 30;
 
 @Injectable()
 export class OrderService {
@@ -21,6 +23,7 @@ export class OrderService {
     private prisma: PrismaService,
     private userService: UserService,
     private discountService: DiscountService,
+    private promoService: PromoService,
   ) {}
 
   async placeOrder(dto: OrderDto, userId: number) {
@@ -33,9 +36,13 @@ export class OrderService {
 
     const discount = await this.discountService.getByEmail(email);
 
-    const total_disc = discount
-      ? total * (1 - DISCOUNT_PERCANTAGE / 100)
-      : total;
+    const promo = await this.promoService.getByName(dto.info.promo);
+
+    const total_disc = promo
+      ? total * (1 - PROMO_PERCANTAGE / 100)
+      : discount
+        ? total * (1 - DISCOUNT_PERCANTAGE / 100)
+        : total;
 
     const order = await this.prisma.order.create({
       data: {

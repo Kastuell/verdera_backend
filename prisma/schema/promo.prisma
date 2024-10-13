@@ -1,0 +1,9 @@
+model Promo {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    name String @unique
+
+    isActive Boolean @default(false)
+}
