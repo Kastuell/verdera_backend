@@ -26,6 +26,26 @@ export class OrderService {
     private promoService: PromoService,
   ) {}
 
+  async getAllOrders() {
+    const orders = await this.prisma.order.findMany({
+      select: {
+        ...returnOrdersObject,
+        user: {
+          select: {
+            phone: true,
+            email: true,
+            name: true,
+            family: true,
+            surname: true,
+            social: true,
+          },
+        },
+      },
+    });
+
+    return orders;
+  }
+
   async placeOrder(dto: OrderDto, userId: number) {
     const total = dto.items.reduce(
       (prev, cur) => prev + cur.price * cur.quantity,

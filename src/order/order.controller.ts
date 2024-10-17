@@ -35,4 +35,10 @@ export class OrderController {
   async getMyOrders(@CurrentUser('id') userId: number) {
     return this.orderService.getMyOrders(userId);
   }
+
+  @Get('all')
+  @Auth('ADMIN')
+  async getAllOrders() {
+    return this.orderService.getAllOrders();
+  }
 }
