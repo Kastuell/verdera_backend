@@ -41,6 +41,9 @@ export class OrderService {
           },
         },
       },
+      orderBy: {
+        id: 'desc'
+      }
     });
 
     return orders;

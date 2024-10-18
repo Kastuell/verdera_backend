@@ -17,6 +17,7 @@ import { CourseChapterService } from 'src/course_chapter/course_chapter.service'
 import { LectionService } from 'src/lection/lection.service';
 import { LocalFileService } from 'src/local_file/local_file.service';
 import { UserService } from 'src/user/user.service';
+import { endHelper } from 'src/utils/endHelper';
 import { Context, Input, Telegraf } from 'telegraf';
 import { CallbackQuery, Update } from 'telegraf/typings/core/types/typegram';
 import { WizardContext } from 'telegraf/typings/scenes';
@@ -92,26 +93,31 @@ export class GetLectionScene {
         callBack.callbackQuery.data.slice(8),
         user.id,
       );
-      await ctx.reply(
-        'Процесс получения материалов к лекции может занять какое-то время',
-      );
-      lection.materials.forEach((item) => {
-        const stream = createReadStream(
-          process.platform == 'win32'
-            ? join(process.cwd(), item.path)
-            : join(process.cwd(), item.path.split('\\').join('/')),
-        );
-        ctx.replyWithDocument(
-          // Input.fromReadableStream(stream, `${lection.name}.docx`),
-          Input.fromReadableStream(stream, item.filename),
-        );
-      });
 
-      // ctx.replyWithDocument(
-      //   Input.fromURLStream(
-      //     `http://${process.env.DOMAIN}:${process.env.PORT}/api/local-file/lection/2`, "qe.docx"
-      //   ),
-      // );
+      if (lection.materials.length !== 0) {
+        await ctx.reply(
+          `Процесс получения материалов к лекции может занять какое-то время. Ожидайте ${endHelper(lection.materials.length, ['материал', 'материала', 'материалов'])}`,
+        );
+        lection.materials.forEach((item) => {
+          const stream = createReadStream(
+            process.platform == 'win32'
+              ? join(process.cwd(), item.path)
+              : join(process.cwd(), item.path.split('\\').join('/')),
+          );
+          ctx.replyWithDocument(
+            // Input.fromReadableStream(stream, `${lection.name}.docx`),
+            Input.fromReadableStream(stream, item.filename),
+          );
+        });
+
+        // ctx.replyWithDocument(
+        //   Input.fromURLStream(
+        //     `http://${process.env.DOMAIN}:${process.env.PORT}/api/local-file/lection/2`, "qe.docx"
+        //   ),
+        // );
+      } else {
+        await ctx.reply('К данной главе отсутствуют лекции');
+      }
     } catch (e) {
       console.log(e);
     }
