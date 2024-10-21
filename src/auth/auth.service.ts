@@ -133,7 +133,7 @@ export class AuthService {
     });
 
     await this.emailService.sendEmail({
-      to: 'sholotun@mail.ru',
+      to: user.email,
       code: user.confirmCode,
     });
 
