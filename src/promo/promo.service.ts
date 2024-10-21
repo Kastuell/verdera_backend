@@ -1,7 +1,6 @@
 import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
+  BadRequestException,
+  Injectable
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
@@ -15,8 +14,6 @@ export class PromoService {
         name: name,
       },
     });
-
-    if (!promo) throw new NotFoundException('Такого промокода нет!');
 
     return promo;
   }
