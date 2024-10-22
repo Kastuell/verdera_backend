@@ -199,6 +199,16 @@ export class UserService {
   }
 
   async update(id: number, dto: UserUpdateDto) {
+    const old_user = await this.prisma.user.findUnique({
+      where: {
+        phone: dto.phone,
+      },
+    });
+
+    if (old_user && id !== old_user.id)
+      throw new BadRequestException(
+        'Пользователь с таким номером телефона уже существует',
+      );
     const user = await this.prisma.user.update({
       where: {
         id,
