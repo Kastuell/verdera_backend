@@ -65,7 +65,7 @@ export class EmailService {
     const data = {
       mail: {
         to: {
-          email: to,
+          email: to.toLowerCase(),
           name: 'string',
         },
         from: {
@@ -99,7 +99,7 @@ export class EmailService {
   async resendConfirm(email: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
     });
 
@@ -117,7 +117,7 @@ export class EmailService {
     const data = {
       mail: {
         to: {
-          email: email,
+          email: email.toLowerCase(),
           name: user.name,
         },
         from: {
@@ -151,7 +151,7 @@ export class EmailService {
   async sendResetPassword(email: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
     });
 
@@ -164,7 +164,7 @@ export class EmailService {
     const data = {
       mail: {
         to: {
-          email: email,
+          email: email.toLowerCase(),
           name: user.name,
         },
         from: {

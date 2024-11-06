@@ -33,7 +33,10 @@ export class AuthService {
   ) {}
 
   async login(dto: AuthLoginDto) {
-    const { password, ...user } = await this.validateUser(dto);
+    const { password, ...user } = await this.validateUser({
+      email: dto.email.toLowerCase(),
+      password: dto.password,
+    });
     const tokens = this.issueTokens(user.id);
 
     if (!user.isEmailConfirmed) {
@@ -53,7 +56,7 @@ export class AuthService {
       throw new BadRequestException('Предоставьте почту');
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
       select: {
         id: true,
@@ -76,7 +79,7 @@ export class AuthService {
         if (code == user.confirmCode) {
           const updated_user = await this.prisma.user.update({
             where: {
-              email: to,
+              email: to.toLowerCase(),
             },
             data: {
               isEmailConfirmed: true,
@@ -101,7 +104,7 @@ export class AuthService {
     const { email, phone } = dto;
     const oldUser = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
     });
     const oldUser2 = await this.prisma.user.findUnique({
@@ -120,7 +123,7 @@ export class AuthService {
         'Пользователь с таким телефоном уже существует',
       );
 
-    const { password, ...rest } = dto;
+    const { password, email: eml, ...rest } = dto;
 
     const user = await this.prisma.user.create({
       data: {
@@ -128,12 +131,13 @@ export class AuthService {
         role: EnumUserRoles.USER,
         active: true,
         confirmCode: uuidv4(),
+        email: eml.toLowerCase(),
         ...rest,
       },
     });
 
     await this.emailService.sendEmail({
-      to: user.email,
+      to: user.email.toLowerCase(),
       code: user.confirmCode,
     });
 
@@ -154,7 +158,7 @@ export class AuthService {
   ) {
     const { password } = dto;
 
-    const user = await this.getUserByEmail(query.email);
+    const user = await this.getUserByEmail(query.email.toLowerCase());
 
     if (!user) throw new NotFoundException('Пользователя с такой почтой нет');
 
@@ -164,7 +168,7 @@ export class AuthService {
 
     const new_user = await this.prisma.user.update({
       where: {
-        email: query.email,
+        email: query.email.toLowerCase(),
       },
       data: {
         password: await hash(password),
@@ -232,7 +236,7 @@ export class AuthService {
     const { email } = dto;
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
     });
 
