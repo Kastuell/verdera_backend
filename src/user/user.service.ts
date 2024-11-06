@@ -113,7 +113,7 @@ export class UserService {
       throw new BadRequestException('Предоставьте почту');
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
       select: {
         ...returnUserObject,
@@ -142,7 +142,7 @@ export class UserService {
       throw new BadRequestException('Предоставьте почту');
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
       select: {
         ...returnUserObject,

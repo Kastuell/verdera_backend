@@ -18,7 +18,7 @@ export class DiscountService {
 
     const discount = await this.prisma.discount.create({
       data: {
-        email: dto.email,
+        email: dto.email.toLowerCase(),
       },
     });
 
@@ -36,7 +36,7 @@ export class DiscountService {
   async getByEmail(email: string) {
     const discount = await this.prisma.discount.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
     });
 
@@ -46,7 +46,7 @@ export class DiscountService {
   async getMyDiscount(email: string) {
     const discount = await this.prisma.discount.findUnique({
       where: {
-        email: email,
+        email: email.toLowerCase(),
       },
     });
 

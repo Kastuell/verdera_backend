@@ -33,10 +33,7 @@ export class AuthService {
   ) {}
 
   async login(dto: AuthLoginDto) {
-    const { password, ...user } = await this.validateUser({
-      email: dto.email.toLowerCase(),
-      password: dto.password,
-    });
+    const { password, ...user } = await this.validateUser(dto);
     const tokens = this.issueTokens(user.id);
 
     if (!user.isEmailConfirmed) {
