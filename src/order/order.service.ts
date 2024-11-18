@@ -42,11 +42,63 @@ export class OrderService {
         },
       },
       orderBy: {
-        id: 'desc'
-      }
+        id: 'desc',
+      },
     });
 
     return orders;
+  }
+
+  async smartOrder(dto: OrderDto, userId: number) {
+    const total = dto.items.reduce(
+      (prev, cur) => prev + cur.price * cur.quantity,
+      0,
+    );
+
+    const { email } = await this.userService.getById(userId);
+
+    const discount = await this.discountService.getByEmail(email);
+
+    const promo = await this.promoService.getByName(dto.info.promo);
+
+    const total_disc = promo
+      ? total * (1 - PROMO_PERCANTAGE / 100)
+      : discount
+        ? total * (1 - DISCOUNT_PERCANTAGE / 100)
+        : total;
+
+    const order = await this.prisma.order.create({
+      data: {
+        status: dto.status,
+        items: {
+          create: dto.items,
+        },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        info: dto.info,
+        total: total_disc,
+      },
+    });
+
+    const payment = await yooKassa.createPayment({
+      amount: {
+        value: total_disc.toFixed(2),
+        currency: 'RUB',
+      },
+      // payment_method_data: {
+      //   type: 'bank_card',
+      // },
+      confirmation: {
+        type: 'redirect',
+        return_url: process.env.FRONT_URL + '/thanks',
+      },
+      description: `Заказ #${order.id}`,
+    });
+
+    return payment;
   }
 
   async placeOrder(dto: OrderDto, userId: number) {

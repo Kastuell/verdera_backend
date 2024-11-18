@@ -21,7 +21,7 @@ export class OrderController {
   @Auth()
   @UsePipes(new ValidationPipe())
   placeOrder(@Body() dto: OrderDto, @CurrentUser('id') userId: number) {
-    return this.orderService.placeOrder(dto, userId);
+    return this.orderService.smartOrder(dto, userId);
   }
 
   @Post('status')
