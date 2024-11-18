@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  Injectable
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -11,7 +8,7 @@ export class PromoService {
   async getByName(name: string) {
     const promo = await this.prisma.promo.findUnique({
       where: {
-        name: name,
+        name: name.toLowerCase(),
       },
     });
 
@@ -21,7 +18,7 @@ export class PromoService {
   async create(name: string) {
     const old_promo = await this.prisma.promo.findUnique({
       where: {
-        name: name,
+        name: name.toLowerCase(),
       },
     });
 
@@ -29,7 +26,7 @@ export class PromoService {
 
     const promo = await this.prisma.promo.create({
       data: {
-        name: name,
+        name: name.toLowerCase(),
       },
     });
 
