@@ -6,7 +6,7 @@ export class PromoService {
   constructor(private prisma: PrismaService) {}
 
   async getByName(name: string) {
-    if (typeof name == 'string') {
+    if (typeof name == 'string' ) {
       const promo = await this.prisma.promo.findUnique({
         where: {
           name: name.toLowerCase(),

@@ -16,7 +16,7 @@ export class OrderDto {
     family: string;
     name: string;
     phone: string;
-    promo: string;
+    promo?: string;
   };
 }
 
