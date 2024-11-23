@@ -6,6 +6,7 @@ export class PromoService {
   constructor(private prisma: PrismaService) {}
 
   async getByName(name: string) {
+    console.log(name)
     if (name !== undefined) {
       const promo = await this.prisma.promo.findUnique({
         where: {
