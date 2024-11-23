@@ -59,7 +59,7 @@ export class OrderService {
 
     const discount = await this.discountService.getByEmail(email);
 
-    const promo = await this.promoService.getByName(dto.info.promo);
+    const promo = await this.promoService.getByName(dto.info.promo ?? '');
 
     const total_disc = promo
       ? total * (1 - PROMO_PERCANTAGE / 100)
@@ -111,7 +111,7 @@ export class OrderService {
 
     const discount = await this.discountService.getByEmail(email);
 
-    const promo = await this.promoService.getByName(dto.info.promo);
+    const promo = await this.promoService.getByName(dto.info.promo ?? '');
 
     const total_disc = promo
       ? total * (1 - PROMO_PERCANTAGE / 100)
