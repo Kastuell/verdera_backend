@@ -6,13 +6,14 @@ export class PromoService {
   constructor(private prisma: PrismaService) {}
 
   async getByName(name: string) {
-    const promo = await this.prisma.promo.findUnique({
-      where: {
-        name: name.toLowerCase(),
-      },
-    });
-
-    return promo;
+    if (name !== undefined) {
+      const promo = await this.prisma.promo.findUnique({
+        where: {
+          name: name.toLowerCase(),
+        },
+      });
+      return promo;
+    }
   }
 
   async create(name: string) {
