@@ -12,7 +12,7 @@ export class PromoController {
     return this.promoService.getByName(name);
   }
 
-  @Post()
+  @Post("create")
   @Auth('ADMIN')
   create(@Body() dto: { name: string; value: number }) {
     return this.promoService.create(dto);

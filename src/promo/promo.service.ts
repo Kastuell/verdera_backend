@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -6,6 +10,16 @@ export class PromoService {
   constructor(private prisma: PrismaService) {}
 
   async getByName(name: string) {
+    if (!name) throw new BadRequestException('Предоставьте промокод');
+
+    const promo = await this.prisma.promo.findUnique({
+      where: {
+        name: name.toLowerCase(),
+      },
+    });
+
+    if (!promo) throw new NotFoundException('Такого промокода нет');
+
     if (typeof name == 'string') {
       const promo = await this.prisma.promo.findUnique({
         where: {
