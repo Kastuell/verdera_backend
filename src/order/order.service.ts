@@ -62,7 +62,7 @@ export class OrderService {
     const promo = await this.promoService.getByName(dto.info.promo);
 
     const total_disc = promo
-      ? total * (1 - PROMO_PERCANTAGE / 100)
+      ? total * (1 - promo.value / 100)
       : discount
         ? total * (1 - DISCOUNT_PERCANTAGE / 100)
         : total;
