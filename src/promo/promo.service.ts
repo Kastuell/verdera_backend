@@ -10,8 +10,6 @@ export class PromoService {
   constructor(private prisma: PrismaService) {}
 
   async getByName(name: string) {
-    if (!name) throw new BadRequestException('Предоставьте промокод');
-
     const promo = await this.prisma.promo.findUnique({
       where: {
         name: name.toLowerCase(),
