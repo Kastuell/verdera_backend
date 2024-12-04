@@ -106,7 +106,7 @@ export class QuestionService {
   }
 
   async getBySlug(slug: string) {
-    const question = await this.prisma.question.findUnique({
+    const question = await this.prisma.question.findFirst({
       where: {
         slug: slug,
       },
@@ -130,7 +130,6 @@ export class QuestionService {
             id: dto.testId,
           },
         },
-        type: '',
       },
     });
 
@@ -150,7 +149,6 @@ export class QuestionService {
             id: dto.testId,
           },
         },
-        type: '',
       },
     });
 

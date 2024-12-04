@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { AnswerDto } from './dto/answer.dto';
+import { AnswerDto, AnswerSmartDto } from './dto/answer.dto';
 import { returnAnswerObject } from './return-answer.object';
 
 @Injectable()
@@ -114,6 +114,20 @@ export class AnswerService {
         });
 
     return answer;
+  }
+
+  async createSmart(dto: AnswerSmartDto) {
+    const answers = dto.answers.map(
+      (item: { value: string; questionCorrectId?: boolean }) =>
+        this.create({
+          ...item,
+          questionId: dto.id,
+          type: '',
+          questionCorrectId: item.questionCorrectId ? dto.id : undefined,
+        }),
+    );
+
+    return answers;
   }
 
   async update(id: number, dto: AnswerDto) {

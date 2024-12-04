@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { Auth } from 'src/decorators/auth.decorator';
 import { AnswerService } from './answer.service';
-import { AnswerDto } from './dto/answer.dto';
+import { AnswerDto, AnswerSmartDto } from './dto/answer.dto';
 
 @Controller('answer')
 export class AnswerController {
@@ -40,6 +40,14 @@ export class AnswerController {
   @UsePipes(new ValidationPipe())
   create(@Body() dto: AnswerDto) {
     return this.answerService.create(dto);
+  }
+
+
+  @Post("smart")
+  @Auth('ADMIN')
+  @UsePipes(new ValidationPipe())
+  createSmart(@Body() dto: AnswerSmartDto) {
+    return this.answerService.createSmart(dto);
   }
 
   @Put(':id')

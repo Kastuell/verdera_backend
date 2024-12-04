@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AnswerDto implements Prisma.AnswerUpdateInput {
   @IsString()
@@ -15,4 +15,12 @@ export class AnswerDto implements Prisma.AnswerUpdateInput {
   @IsOptional()
   @IsNumber()
   questionCorrectId: number;
+}
+
+export class AnswerSmartDto {
+  @IsNumber()
+  id: number;
+
+  @IsArray()
+  answers: [];
 }

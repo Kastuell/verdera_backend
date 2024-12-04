@@ -13,7 +13,7 @@ import {
 import { Auth } from 'src/decorators/auth.decorator';
 import { CurrentUser } from 'src/decorators/user.decorator';
 import { CourseTestService } from './course_test.service';
-import { CheckTestDto, TestDto } from './dto/test.dto';
+import { CheckTestDto, SmartTestDto, TestDto } from './dto/test.dto';
 
 @Controller('course-test')
 export class CourseTestController {
@@ -53,6 +53,13 @@ export class CourseTestController {
   @UsePipes(new ValidationPipe())
   create(@Body() dto: TestDto) {
     return this.courseTestService.create(dto);
+  }
+
+  @Post("smart")
+  @Auth('ADMIN')
+  @UsePipes(new ValidationPipe())
+  createSmart(@Body() dto: SmartTestDto) {
+    return this.courseTestService.createSmart(dto);
   }
 
   @Put(':id')

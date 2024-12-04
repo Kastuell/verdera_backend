@@ -10,6 +10,11 @@ export const returnTestObject: Prisma.TestSelect = {
         select: {
           value: true
         }
+      },
+      answers: {
+        select: {
+          value: true,
+        }
       }
     }
   },

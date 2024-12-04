@@ -18,10 +18,8 @@ model Question {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    name String @unique
-    slug String @unique
-
-    type String
+    name String
+    slug String @default("")
 
     answers Answer[] @relation("answers")
 
@@ -46,15 +44,14 @@ model Answer {
     questionCorrectId Int?      @map("question_correct_id")
 }
 
-
 model CompleteTest {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    user     User   @relation(fields: [userId], references: [id])
-    userId   Int    @map("user_id")
+    user   User @relation(fields: [userId], references: [id])
+    userId Int  @map("user_id")
     test   Test @relation(fields: [testId], references: [id], onDelete: Cascade)
-    testId Int    @map("test_id")
+    testId Int  @map("test_id")
 
     @@id([userId, testId])
 }

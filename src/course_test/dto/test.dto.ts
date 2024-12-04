@@ -11,8 +11,35 @@ export class TestDto implements Prisma.TestUpdateInput {
 
 export class CheckTestDto {
   @IsNumber()
-  testId: number
-  
+  testId: number;
+
   @IsArray()
   userTest: { questId: number; answerId: number[] }[];
 }
+
+export class SmartTestDto {
+  @IsString()
+  name: string;
+
+  @IsArray()
+  questions: QuestionDto[];
+
+  @IsNumber()
+  courseChapter: number;
+}
+
+class QuestionDto {
+  @IsString()
+  name: string;
+
+  @IsArray()
+  options: OptionsT[];
+
+  @IsString()
+  correctAnswer: string;
+}
+
+export type OptionsT = {
+  letter: string;
+  text: string;
+};

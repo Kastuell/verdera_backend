@@ -10,7 +10,7 @@ import { QuestionService } from 'src/question/question.service';
 import { returnQuestionObject } from 'src/question/return-question.object';
 import translit from 'src/utils/generate-slug';
 import { shuffle } from '../utils/shufle';
-import { CheckTestDto, TestDto } from './dto/test.dto';
+import { CheckTestDto, SmartTestDto, TestDto } from './dto/test.dto';
 import { returnTestObject } from './return-test.object';
 
 @Injectable()
@@ -159,6 +159,93 @@ export class CourseTestService {
     return shuffledTest;
   }
 
+  async createSmart(dto: SmartTestDto) {
+    const { name, questions } = dto;
+
+    const { id: test_id } = await this.prisma.test.findUnique({
+      where: {
+        name: name,
+      },
+    });
+
+    // const create_test = await this.prisma.test.create({
+    //   data: {
+    //     name: name,
+    //     slug: translit(name),
+    //     courseChapter: {
+    //       connect: {
+    //         id: 0,
+    //       },
+    //     },
+    //   },
+    // });
+
+    // {
+    //   id: number;
+    //   name: string;
+    //   correct_answer: string;
+    //   questions: OptionsT[];
+    // }
+
+    const created_questions = questions.map(async (item) => {
+      const { id, name } = await this.prisma.question.create({
+        data: {
+          name: item.name,
+          slug: translit(item.name),
+          test: {
+            connect: {
+              id: test_id,
+            },
+          },
+        },
+      });
+
+      return {
+        id,
+        name,
+        correct_answer: item.correctAnswer,
+        questions: item.options,
+      };
+    });
+
+    const result = created_questions.map(async (item) => {
+      const answers = (await item).questions.forEach(async (it) => {
+        if ((await item).correct_answer == it.letter) {
+          await this.prisma.answer.create({
+            data: {
+              value: it.text,
+              question: {
+                connect: {
+                  id: (await item).id,
+                },
+              },
+              questionCorrect: {
+                connect: {
+                  id: (await item).id,
+                },
+              },
+              type: '',
+            },
+          });
+        } else {
+          await this.prisma.answer.create({
+            data: {
+              value: it.text,
+              question: {
+                connect: {
+                  id: (await item).id,
+                },
+              },
+              type: '',
+            },
+          });
+        }
+      });
+      return answers;
+    });
+    return result;
+  }
+
   async createCompleteTest(testId: number, userId: number) {
     const completedTest = await this.prisma.completeTest.create({
       data: {
@@ -223,10 +310,12 @@ export class CourseTestService {
 
     const sortedUserTest = dto.userTest.sort((a, b) => a.questId - b.questId);
 
-    const thisQuestionsMapped = thisQuestions.map((item) => ({
-      questId: item.id,
-      answerId: item.answers.map((item) => item.id),
-    }));
+    const thisQuestionsMapped = thisQuestions
+      .map((item) => ({
+        questId: item.id,
+        answerId: item.answers.map((item) => item.id),
+      }))
+      .sort((a, b) => a.questId - b.questId);
 
     const result = sortedUserTest.map((i, index) => {
       const qwe = thisQuestionsMapped[index].answerId.map((item) =>
