@@ -343,7 +343,12 @@ export class CourseTestService {
       }
     });
 
-    if (result.findIndex((item) => item.isCorrect == false) == -1) {
+    // const isTestFullCorrect =
+    //   result.findIndex((item) => item.isCorrect == false) == -1;
+
+    const wrongs = result.filter((item) => item.isCorrect == false);
+
+    if (wrongs.length == 0) {
       await this.createCompleteTest(dto.testId, userId);
 
       if (
@@ -363,6 +368,28 @@ export class CourseTestService {
         nextLectionSlug:
           courseChapters[completeCourseChapters.length + 1].lection.slug,
         testSlug: courseChapter.test.slug,
+        wrongs,
+      };
+    } else if (wrongs.length <= 2) {
+      await this.createCompleteTest(dto.testId, userId);
+
+      if (
+        courseChapter.lection == null ||
+        completeLections.findIndex(
+          (item) => item.lectionId == courseChapter.lection.id,
+        ) !== -1
+      ) {
+        await this.courseChapterService.completeCourseChapter(
+          courseChapter.id,
+          userId,
+        );
+      }
+      return {
+        isCorrect: true,
+        nextLectionSlug:
+          courseChapters[completeCourseChapters.length + 1].lection.slug,
+        testSlug: courseChapter.test.slug,
+        wrongs,
       };
     }
 
@@ -370,6 +397,7 @@ export class CourseTestService {
       isCorrect: false,
       curLectionSlug: courseChapter.lection.slug,
       testSlug: courseChapter.test.slug,
+      wrongs,
     };
   }
 
