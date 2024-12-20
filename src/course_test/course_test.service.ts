@@ -308,14 +308,49 @@ export class CourseTestService {
     const thisQuestions =
       await this.questionService.findQuestionsByIds(questionIds);
 
+    const thisQuestinsFull = await this.prisma.question.findMany({
+      where: {
+        id: { in: questionIds },
+      },
+      select: {
+        name: true,
+        id: true,
+        answers: {
+          select: {
+            id: true,
+            questionCorrectId: true,
+            value: true,
+          },
+        },
+        test: {
+          select: {
+            courseChapter: {
+              select: {
+                courseId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const thisQuestionFullSorted = thisQuestinsFull.sort((a, b) => a.id - b.id);
+
     const sortedUserTest = dto.userTest.sort((a, b) => a.questId - b.questId);
 
     const thisQuestionsMapped = thisQuestions
       .map((item) => ({
         questId: item.id,
         answerId: item.answers.map((item) => item.id),
+        name: item.name,
       }))
-      .sort((a, b) => a.questId - b.questId);
+      .sort((a, b) => a.questId - b.questId)
+      .map((item, idx) => ({
+        ...item,
+        question_options: thisQuestionFullSorted[idx].answers.map(
+          (it) => it.value,
+        ),
+      }));
 
     const result = sortedUserTest.map((i, index) => {
       const qwe = thisQuestionsMapped[index].answerId.map((item) =>
@@ -330,6 +365,11 @@ export class CourseTestService {
           questionId: i.questId,
           answerId: i.answerId,
           isCorrect: true,
+          user_answer: {
+            answers: i.user_answer,
+            question: thisQuestionsMapped[index].name,
+          },
+          question_options: thisQuestionsMapped[index].question_options,
         };
       } else if (
         i.questId == thisQuestionsMapped[index].questId &&
@@ -339,6 +379,11 @@ export class CourseTestService {
           questionId: i.questId,
           answerId: i.answerId,
           isCorrect: false,
+          user_answer: {
+            answers: i.user_answer,
+            question: thisQuestionsMapped[index].name,
+          },
+          question_options: thisQuestionsMapped[index].question_options,
         };
       }
     });
@@ -369,6 +414,8 @@ export class CourseTestService {
           courseChapters[completeCourseChapters.length + 1].lection.slug,
         testSlug: courseChapter.test.slug,
         wrongs,
+        procent: 100 - (wrongs.length * 100) / result.length,
+        result,
       };
     } else if (wrongs.length <= 2) {
       await this.createCompleteTest(dto.testId, userId);
@@ -390,6 +437,8 @@ export class CourseTestService {
           courseChapters[completeCourseChapters.length + 1].lection.slug,
         testSlug: courseChapter.test.slug,
         wrongs,
+        procent: 100 - (wrongs.length * 100) / result.length,
+        result,
       };
     }
 
@@ -398,6 +447,8 @@ export class CourseTestService {
       curLectionSlug: courseChapter.lection.slug,
       testSlug: courseChapter.test.slug,
       wrongs,
+      procent: 100 - (wrongs.length * 100) / result.length,
+      result,
     };
   }
 

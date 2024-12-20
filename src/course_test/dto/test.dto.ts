@@ -14,7 +14,14 @@ export class CheckTestDto {
   testId: number;
 
   @IsArray()
-  userTest: { questId: number; answerId: number[] }[];
+  userTest: {
+    questId: number;
+    answerId: number[];
+    user_answer: {
+      id: number;
+      value: string;
+    }[];
+  }[];
 }
 
 export class SmartTestDto {

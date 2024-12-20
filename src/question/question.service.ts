@@ -59,6 +59,7 @@ export class QuestionService {
         id: { in: ids },
       },
       select: {
+        name: true,
         id: true,
         answers: {
           where: {
