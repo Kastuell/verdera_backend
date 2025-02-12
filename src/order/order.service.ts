@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EnumOrderStatus } from '@prisma/client';
 import { DiscountService } from 'src/discount/discount.service';
+import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma.service';
 import { PromoService } from 'src/promo/promo.service';
 import { UserService } from 'src/user/user.service';
@@ -24,6 +25,7 @@ export class OrderService {
     private userService: UserService,
     private discountService: DiscountService,
     private promoService: PromoService,
+    private emailService: EmailService,
   ) {}
 
   async getAllOrders() {
@@ -248,6 +250,8 @@ export class OrderService {
           },
         });
       }
+
+      await this.emailService.sendSuccedOrderEmail(order);
 
       return true;
     }

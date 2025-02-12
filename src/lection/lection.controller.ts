@@ -90,7 +90,7 @@ export class LectionController {
     if (!file) throw new BadRequestException('Please upload a file');
     return this.lectionService.addMaterials(Number(id), {
       path: file.path,
-      filename: Buffer.from(file.originalname, 'latin1').toString('utf-8'),
+      filename: file.originalname,
       mimetype: file.mimetype,
     });
   }

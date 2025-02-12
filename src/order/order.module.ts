@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DiscountService } from 'src/discount/discount.service';
+import { EmailService } from 'src/email/email.service';
 import { LocalFileService } from 'src/local_file/local_file.service';
 import { PrismaService } from 'src/prisma.service';
 import { PromoService } from 'src/promo/promo.service';
@@ -16,6 +17,7 @@ import { OrderService } from './order.service';
     LocalFileService,
     DiscountService,
     PromoService,
+    EmailService
   ],
 })
 export class OrderModule {}

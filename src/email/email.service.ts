@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Order } from '@prisma/client';
 import axios from 'axios';
 import { PrismaService } from 'src/prisma.service';
 import { EmailDto } from './dto/send_email.dto';
 import { ConfirmingLinkTemplate } from './templates/ConfirmingLinkTemplate';
 import { DiscountTemplate } from './templates/DiscountTemplate';
+import { OrderTemplate } from './templates/OrderTemplate';
 import { resetPasswordTemplate } from './templates/resetPasswordTemplate';
 import { SupportTemplate } from './templates/SupportTemplate';
 
@@ -26,6 +28,42 @@ export class EmailService {
         subject: `Рассылка №${discount.id}`,
         previewTitle: `Рассылка №${discount.id}`,
         html: DiscountTemplate({ discount }),
+      },
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Api-Key': process.env.RUSENDER_KEY,
+    };
+    axios
+      .post(url, data, { headers })
+      .then((response) => {
+        // console.log(response);
+        // Обработка ответа API
+      })
+      .catch((error) => {
+        // Обработка ошибки
+        console.log(error);
+      });
+
+    return data;
+  }
+
+  async sendSuccedOrderEmail(order: Order) {
+    const url = process.env.RUSENDER_EMAIL;
+    const data = {
+      mail: {
+        to: {
+          email: `${process.env.SUPPORT_EMAIL}`,
+          name: 'string',
+        },
+        from: {
+          email: 'no-reply@verdera.ru',
+          name: 'Verdera',
+        },
+        subject: `Заказ №${order.id}`,
+        previewTitle: `Заказ №${order.id}`,
+        html: OrderTemplate({ order }),
       },
     };
 
