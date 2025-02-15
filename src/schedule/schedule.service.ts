@@ -352,7 +352,7 @@ export class ScheduleService {
       (item) => item.status == 'PENDING' || item.status == 'SELECTED',
     );
 
-    if (alreadySelected.length == 3 && role !== 'ADMIN')
+    if (alreadySelected.length == 3 && role !== 'ADMIN' && role !== 'TEACHER')
       throw new BadRequestException(
         'Вы не можете выбрать более трёх занятий одновременно',
       );
