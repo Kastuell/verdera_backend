@@ -24,7 +24,7 @@ export class BotStudentUpdate {
     if (!user) {
       await ctx.reply(OUT_IN_DB);
     } else {
-      if (user.role !== 'STUDENT' && user.role !== 'ADMIN') {
+      if (user.role !== 'STUDENT' && user.role !== 'ADMIN' && user.role !== 'TEACHER') {
         await ctx.reply(NOT_STUDENT);
       } else {
         await ctx.scene.enter(GET_LECTIONS);
