@@ -10,4 +10,5 @@ export const returnProductObject: Prisma.ProductSelect = {
   category: true,
   description: true,
   potent: true,
+  stock: true
 };
