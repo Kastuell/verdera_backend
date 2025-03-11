@@ -6,5 +6,5 @@ interface IOrderTemplate {
 
 export const OrderTemplate = (data: IOrderTemplate) => {
   const { order } = data;
-  return `<div>#${order.id}<br /><br />${order.info}<br /><br />Сумма: ${order.total}<br /><br /></div>`;
+  return `<div>#${order.id}<br /><br />${order.info.toString()}<br /><br />Сумма: ${order.total}<br /><br /></div>`;
 };
