@@ -50,6 +50,11 @@ export class EmailService {
   }
 
   async sendSuccedOrderEmail(order: Order) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: order.userId
+      }
+    })
     const url = process.env.RUSENDER_EMAIL;
     const data = {
       mail: {
@@ -63,7 +68,7 @@ export class EmailService {
         },
         subject: `Заказ №${order.id}`,
         previewTitle: `Заказ №${order.id}`,
-        html: OrderTemplate({ order }),
+        html: OrderTemplate({ order, user }),
       },
     };
 

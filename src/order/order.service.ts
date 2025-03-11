@@ -252,7 +252,7 @@ export class OrderService {
       }
 
       await this.emailService.sendSuccedOrderEmail(order);
-
+ 
       return true;
     }
   }
