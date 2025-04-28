@@ -138,7 +138,11 @@ export class AuthService {
       code: user.confirmCode,
     });
 
+    await this.emailService.sendRegister(user.id);
+
     // const tokens = this.issueTokens(user.id);
+
+
 
     return {
       user,

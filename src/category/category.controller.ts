@@ -30,6 +30,13 @@ export class CategoryController {
     return this.categoryService.create(dto)
   }
 
+  @Post('/create-simulator')
+  @Auth('ADMIN')
+  @UsePipes(new ValidationPipe())
+  createSimulator(@Body() dto: categoryDto) {
+    return this.categoryService.createSimulator(dto)
+  }
+
   @Put(':id')
   @Auth('ADMIN')
   @UsePipes(new ValidationPipe())

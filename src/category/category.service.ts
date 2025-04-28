@@ -54,8 +54,6 @@ export class CategoryService {
 
     async create(dto: categoryDto) {
 
-        console.log(dto)
-
         const { name } = dto
 
 
@@ -94,4 +92,22 @@ export class CategoryService {
 
         return category
     }
+
+
+    async createSimulator(dto: categoryDto) {
+
+        const { name } = dto
+
+
+        const category = await this.prisma.simulatorCategory.create({
+            data: {
+                name,
+                slug: translit(name)
+            }
+        })
+
+        return category
+    }
+
+
 }

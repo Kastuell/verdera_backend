@@ -15,6 +15,9 @@ model Product {
     category   Category? @relation(fields: [categoryId], references: [id])
     categoryId Int?      @map("category_id")
 
+    simulatorCategory   SimulatorCategory? @relation(fields: [simulatorCategoryId], references: [id])
+    simulatorCategoryId Int?      @map("simulator_category_id")
+
     orderItems OrderItem[]
     course     Course?
 }

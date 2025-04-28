@@ -6,6 +6,7 @@ import { EmailDto } from './dto/send_email.dto';
 import { ConfirmingLinkTemplate } from './templates/ConfirmingLinkTemplate';
 import { DiscountTemplate } from './templates/DiscountTemplate';
 import { OrderTemplate } from './templates/OrderTemplate';
+import { RegisterTemplate } from './templates/RegisterTemplate';
 import { resetPasswordTemplate } from './templates/resetPasswordTemplate';
 import { SupportTemplate } from './templates/SupportTemplate';
 
@@ -274,4 +275,44 @@ export class EmailService {
 
     return data;
   }
+  async sendRegister(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id
+      }
+    })
+    const url = process.env.RUSENDER_EMAIL;
+    const data = {
+      mail: {
+        to: {
+          email: `${process.env.SUPPORT_EMAIL}`,
+          name: 'string',
+        },
+        from: {
+          email: 'no-reply@verdera.ru',
+          name: 'Verdera',
+        },
+        subject: `Пользователь №${user.id}`,
+        previewTitle: `Пользователь №${user.id}`,
+        html: RegisterTemplate({user}),
+      },
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Api-Key': process.env.RUSENDER_KEY,
+    };
+    axios
+      .post(url, data, { headers })
+      .then((response) => {
+        // console.log(response);
+        // Обработка ответа API
+      })
+      .catch((error) => {
+        // Обработка ошибки
+        console.log(error);
+      });
+
+    return data;
+}
 }
